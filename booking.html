@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f8f9fb;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .booking-container {
+      width: 430px;
+      height: 932px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      background: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #1c1c1e;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .parking-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .slot {
+      background: #e8e8e8;
+      border-radius: 12px;
+      text-align: center;
+      padding: 20px 0;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .slot.available:hover {
+      background: #d0f0d0;
+    }
+
+    .slot.booked {
+      background: #ffb3b3;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    .confirm-btn {
+      width: 100%;
+      background: #007bff;
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .confirm-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="booking-container">
+    <header>
+      <button class="back-btn" onclick="goBack()">←</button>
+      <h1 id="placeName">Loading...</h1>
+      <div style="width:30px;"></div>
+    </header>
+
+    <main>
+      <h2>เลือกช่องจอด:</h2>
+      <div id="parkingGrid" class="parking-grid"></div>
+
+      <button id="confirmBtn" class="confirm-btn" disabled>ยืนยันการจอง</button>
+    </main>
+  </div>
+
+  <script>
+    // รับชื่อสถานที่จาก URL
+    const params = new URLSearchParams(window.location.search);
+    const place = decodeURIComponent(params.get("place"));
+    document.getElementById("placeName").textContent = place;
+
+    const grid = document.getElementById("parkingGrid");
+    const confirmBtn = document.getElementById("confirmBtn");
+    let selectedSlot = null;
+
+    // จำลองข้อมูลช่องจอด
+    const slots = Array.from({ length: 10 }, (_, i) => ({
+      id: "A" + (i + 1),
+      booked: Math.random() < 0.3, // 30% ของที่เต็ม
+    }));
+
+    // แสดงช่องจอด
+    slots.forEach(slot => {
+      const div = document.createElement("div");
+      div.className = "slot " + (slot.booked ? "booked" : "available");
+      div.textContent = slot.id;
+
+      if (!slot.booked) {
+        div.addEventListener("click", () => {
+          document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+          div.classList.add("selected");
+          div.style.background = "#6c9";
+          selectedSlot = slot.id;
+          confirmBtn.disabled = false;
+        });
+      }
+
+      grid.appendChild(div);
+    });
+
+    // ปุ่มยืนยันการจอง
+    confirmBtn.addEventListener("click", () => {
+      if (selectedSlot) {
+        alert(`จองสำเร็จ!\nสถานที่: ${place}\nช่อง: ${selectedSlot}`);
+        window.location.href = "index.html"; // กลับหน้าแผนที่
+      }
+    });
+
+    // ปุ่มย้อนกลับ
+    function goBack() {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
