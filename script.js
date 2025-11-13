@@ -99,11 +99,11 @@ async function handleSearch(query) {
         createBookingMarker(lat, lon, query);
         map.flyTo([lat, lon], 18);
       } else {
-        alert("ไม่พบสถานที่ที่คุณค้นหา");
+        alert("The location you are looking for was not found.");
       }
     } catch (err) {
       console.error("Search error:", err);
-      alert("เกิดข้อผิดพลาดในการค้นหาตำแหน่ง");
+      alert("An error occurred while searching for the location.");
     }
   }
 }
@@ -111,7 +111,7 @@ async function handleSearch(query) {
 // ===== Create Booking Marker (เพิ่มการแสดงจำนวนที่ว่าง) =====
 function createBookingMarker(lat, lng, name, available, total) {
   const marker = L.marker([lat, lng]).addTo(map).bindPopup(
-    `<b>${name}</b><br><span>${available} ช่องว่าง จาก ${total} ช่อง</span><br><button onclick="goToBooking('${encodeURIComponent(name)}')" style="background:#007bff;color:white;border:none;padding:6px 10px;border-radius:8px;margin-top:6px;cursor:pointer;">จองเลย 🚗</button>`
+    `<b>${name}</b><br><span>${available} available from ${total} areas</span><br><button onclick="goToBooking('${encodeURIComponent(name)}')" style="background:#007bff;color:white;border:none;padding:6px 10px;border-radius:8px;margin-top:6px;cursor:pointer;">booking now 🚗</button>`
   );
   allMarkers.push(marker);
 }
@@ -154,6 +154,6 @@ setInterval(() => {
     let change = Math.random() < 0.5 ? -1 : 1;
     loc.available = Math.max(0, Math.min(loc.total, loc.available + change));
     const label = document.querySelector(`#spot-${loc.name.replace(/\s+/g, "-")}`);
-    if (label) label.textContent = `${loc.available} ช่องว่าง`;
+    if (label) label.textContent = `${loc.available} available`;
   });
 }, 5000);
