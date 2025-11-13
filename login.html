@@ -251,8 +251,6 @@ h2 {
     animation: spin 1s linear infinite;
 }
 
-
-
 @keyframes spin {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -266,7 +264,7 @@ h2 {
         <h2>Login</h2>
     </div>
     
-    <form action="dashboard.html" method="POST" id="loginForm">
+    <form action="previousPage" method="POST" id="loginForm">
         <div class="input-group">
             <label for="username">username</label>
             <div class="input-wrapper">
@@ -309,6 +307,7 @@ h2 {
 <script>
 // Add form submission handling with loading state
 document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault(); 
     const loginBtn = document.getElementById('loginBtn');
     loginBtn.classList.add('loading');
     
@@ -316,6 +315,43 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     setTimeout(() => {
         loginBtn.classList.remove('loading');
     }, 2000);
+});
+
+// เมื่อผู้ใช้ล็อกอินเสร็จแล้ว (เมื่อกดปุ่ม login)
+const loginButton = document.getElementById("loginBtn");
+
+loginButton.addEventListener("click", function () {
+  const usernameInput = document.getElementById("username");
+  const usernameValue = usernameInput ? usernameInput.value.trim().toLowerCase() : "";
+
+  const storedUserRaw = localStorage.getItem("userData");
+  if (storedUserRaw) {
+    try {
+      const storedUser = JSON.parse(storedUserRaw);
+      if (storedUser && storedUser.username && storedUser.email) {
+        const storedUsername = String(storedUser.username).trim().toLowerCase();
+        if (!usernameValue || usernameValue === storedUsername) {
+          localStorage.setItem("userEmail", storedUser.email);
+        }
+      }
+    } catch (error) {
+      console.warn("Unable to read stored user data:", error);
+    }
+  }
+
+  // หลังจากล็อกอินสำเร็จ บันทึกสถานะการล็อกอิน
+  localStorage.setItem("loggedIn", "true");
+
+  // ตรวจสอบว่า URL หน้าเดิมถูกบันทึกใน localStorage หรือไม่
+  const previousPage = localStorage.getItem("previousPage");
+
+  if (previousPage) {
+    // ถ้ามีหน้าเดิม ให้พาผู้ใช้ไปหน้าเดิม
+    window.location.href = previousPage;
+  } else {
+    // ถ้าไม่มีหน้าเดิม พาผู้ใช้ไปยังหน้าแรก
+    window.location.href = "index.html";
+  }
 });
 
 // Add input focus animations
@@ -335,6 +371,10 @@ function login() {
   localStorage.setItem("isLoggedIn", "true");
   window.location.href = "index.html";  // เปลี่ยนหน้าไปยังหน้าหลักหลังจากล็อกอินสำเร็จ
 }
+
+window.addEventListener('load', function() {
+    localStorage.setItem("previousPage", document.referrer);  // บันทึก URL ของหน้าที่ผู้ใช้มาจาก
+});
 
 </script>
 </body>

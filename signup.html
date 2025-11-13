@@ -604,6 +604,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressFill = document.getElementById('progressFill');
     const inputs = form.querySelectorAll('input[required], select[required]');
     const termsCheckbox = document.getElementById('terms');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const licensePlateInput = document.getElementById('license-plate');
+    const carTypeInput = document.getElementById('car-type');
+    const carBrandInput = document.getElementById('car-brand');
+    const carModelInput = document.getElementById('car-model');
+    const carColorInput = document.getElementById('car-color');
     
     // Password strength checker
     const password = document.getElementById('password');
@@ -721,15 +728,49 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('รหัสผ่านไม่ตรงกัน');
             return;
         }
-        
+
         signupBtn.classList.add('loading');
-        signupBtn.textContent = '';
-        
-        // Simulate form submission
-        setTimeout(() => {
+        signupBtn.disabled = true;
+        const originalButtonText = signupBtn.textContent;
+        signupBtn.textContent = 'Signing up...';
+
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim().toLowerCase();
+        const vehicle = {
+            licensePlate: licensePlateInput.value.trim().toUpperCase(),
+            type: carTypeInput.value,
+            brand: carBrandInput.value.trim(),
+            model: carModelInput.value.trim(),
+            color: carColorInput.value.trim()
+        };
+
+        const userData = {
+            username,
+            fullName: username,
+            email,
+            vehicles: [vehicle],
+            createdAt: new Date().toISOString()
+        };
+
+        try {
+            localStorage.setItem('userData', JSON.stringify(userData));
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('loggedIn', 'true');
+
             alert('สมัครสมาชิกสำเร็จ!');
-            // window.location.href = 'dashboard.html';
-        }, 2000);
+            window.location.href = 'personal_info.html';
+        } catch (error) {
+            console.error('Unable to save signup data:', error);
+            alert('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
+            signupBtn.disabled = false;
+            signupBtn.classList.remove('loading');
+            signupBtn.textContent = originalButtonText;
+            return;
+        }
+
+        signupBtn.classList.remove('loading');
+        signupBtn.disabled = false;
+        signupBtn.textContent = originalButtonText;
     });
     
     // Initialize progress
