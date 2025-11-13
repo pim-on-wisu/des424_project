@@ -40,23 +40,83 @@ let allMarkers = [];
 
 // ===== Custom Locations for Search (เพิ่มข้อมูลจำนวนช่องจอดที่ว่าง) =====
 const customLocations = [
-  { keywords: ["ยิม 7", "gym 7"], name: "ยิม 7", lat: 14.06991063395858, lng: 100.60127691199303, available: 5, total: 10 },
-  { keywords: ["สกร", "sgr"], name: "สกร (SGR Building)", lat: 14.071526194306847, lng: 100.60373525365584, available: 3, total: 10 },
+  { keywords: ["ยิม 7", "gym 7"], name: "ยิม 7", lat: 14.06991063395858, lng: 100.60127691199303, available: 0, total: 10 },
+  { keywords: ["สกร", "sgr"], name: "สกร (SGR Building)", lat: 14.071526194306847, lng: 100.60373525365584, available: 0, total: 10 },
   {
     keywords: ["interzone", "อินเตอร์โซน", "tops", "ทิวสน"],
     name: "Interzone / Tops / ทิวสน",
-    lat: 14.076015771509779, lng: 100.59795880142016, available: 8, total: 10,
-    lat2: 14.07682278342416, lng2: 100.59639938431137, available2: 6, total2: 10
+    lat: 14.076015771509779, lng: 100.59795880142016, available: 0, total: 10,
+    lat2: 14.07682278342416, lng2: 100.59639938431137, available2: 0, total2: 10
   },
-  { keywords: ["sc", "โรงอาหาร sc"], name: "SC Canteen", lat: 14.069925020628173, lng: 100.60475923799383, available: 7, total: 10 },
-  { keywords: ["uvillage", "u village", "ยูวิลเลจ"], name: "U Village", lat: 14.06608047410596, lng: 100.60964327537296, available: 4, total: 10 },
-  { keywords: ["mingle", "มิงเกิล"], name: "Mingle Café", lat: 14.06643051762887, lng: 100.61064864591621, available: 2, total: 10 },
-  { keywords: ["siit bkd", "siit บกด", "บกด"], name: "SIIT BKD", lat: 13.980709012610262, lng: 100.55455850149666, available: 3, total: 5 },
+  { keywords: ["sc", "โรงอาหาร sc"], name: "SC Canteen", lat: 14.069925020628173, lng: 100.60475923799383, available: 0, total: 10 },
+  { keywords: ["uvillage", "u village", "ยูวิลเลจ"], name: "U Village", lat: 14.06608047410596, lng: 100.60964327537296, available: 0, total: 10 },
+  { keywords: ["mingle", "มิงเกิล"], name: "Mingle Café", lat: 14.06643051762887, lng: 100.61064864591621, available: 0, total: 10 },
+  { keywords: ["siit bkd", "siit บกด", "บกด"], name: "SIIT BKD", lat: 13.980709012610262, lng: 100.55455850149666, available: 0, total: 5 },
 
   // เพิ่มคำค้นสำหรับ SIIT Parking A1 และ A2
-  { keywords: ["siit", "สิรินธร", "สถาบันเทคโนโลยีนานาชาติสิรินธร"], name: "SIIT Parking A1", lat: 14.068225363631793, lng: 100.60776673076252, available: 6, total: 10 },
-  { keywords: ["siit", "สิรินธร", "สถาบันเทคโนโลยีนานาชาติสิรินธร"], name: "SIIT Parking A2", lat: 14.068881627251303, lng: 100.60813318970119, available: 9, total: 12 },
+  { keywords: ["siit", "สิรินธร", "สถาบันเทคโนโลยีนานาชาติสิรินธร"], name: "SIIT Parking A1", lat: 14.068225363631793, lng: 100.60776673076252, available: 0, total: 10 },
+  { keywords: ["siit", "สิรินธร", "สถาบันเทคโนโลยีนานาชาติสิรินธร"], name: "SIIT Parking A2", lat: 14.068881627251303, lng: 100.60813318970119, available: 0, total: 12 },
 ];
+
+// ===== Fetch Realtime Parking Data from AWS =====
+async function fetchParkingData() {
+  try {
+    const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParking");
+    const json = await response.json();
+    const data = json.data; // ✅ แก้ตรงนี้
+
+    console.log("📡 Data from AWS:", data);
+
+    // อัปเดต customLocations ให้ตรงกับข้อมูลจริง
+    data.forEach((slot) => {
+      const found = customLocations.find(loc =>
+        loc.name.toLowerCase().includes(slot.slot_id.toLowerCase())
+      );
+
+      if (found) {
+        found.available = slot.status === "free" ? 1 : 0;
+      }
+    });
+
+    updateMarkersWithRealtime();
+  } catch (error) {
+    console.error("Error fetching parking data:", error);
+  }
+}
+
+// ===== Update Markers with Realtime Status =====
+function updateMarkersWithRealtime() {
+  allMarkers.forEach((m) => map.removeLayer(m));
+  allMarkers = [];
+
+  customLocations.forEach((loc) => {
+    const iconUrl = loc.available > 0
+      ? "https://cdn-icons-png.flaticon.com/512/190/190411.png" // ✅ สีเขียว ว่าง
+      : "https://cdn-icons-png.flaticon.com/512/463/463612.png"; // ❌ สีแดง เต็ม
+
+    const marker = L.marker([loc.lat, loc.lng], {
+      icon: L.icon({
+        iconUrl: iconUrl,
+        iconSize: [32, 32],
+      }),
+    })
+      .addTo(map)
+      .bindPopup(
+        `<b>${loc.name}</b><br>
+         สถานะ: ${loc.available > 0 ? "🟢 ว่าง" : "🔴 ไม่ว่าง"}<br>
+         <button onclick="goToBooking('${encodeURIComponent(loc.name)}')"
+           style="background:#007bff;color:white;border:none;padding:6px 10px;border-radius:8px;margin-top:6px;cursor:pointer;">
+           จองเลย 🚗
+         </button>`
+      );
+    allMarkers.push(marker);
+  });
+}
+
+// ===== เรียก API ทุก ๆ 10 วินาที =====
+fetchParkingData();
+setInterval(fetchParkingData, 10000);
+
 
 // ===== Handle Search Input =====
 const searchInput = document.querySelector(".search-bar input");
@@ -116,10 +176,12 @@ function createBookingMarker(lat, lng, name, available, total) {
   allMarkers.push(marker);
 }
 
-// ===== Go to Booking Page =====
+// ===== Go to Booking (เชื่อม AWS API) =====
 function goToBooking(place) {
-  window.location.href = `booking.html?place=${place}`;
+  // เปิดหน้า booking.html พร้อมชื่อสถานที่
+  window.location.href = `booking.html?place=${encodeURIComponent(place)}`;
 }
+
 
 // ===== Show SIIT Parking Spots =====
 function showSIITParking() {
@@ -148,12 +210,3 @@ function showSIITParking() {
   map.setView([avgLat, avgLng], 18.5);
 }
 
-// ===== Realtime Update Mock (Update Available Spots) =====
-setInterval(() => {
-  customLocations.forEach((loc) => {
-    let change = Math.random() < 0.5 ? -1 : 1;
-    loc.available = Math.max(0, Math.min(loc.total, loc.available + change));
-    const label = document.querySelector(`#spot-${loc.name.replace(/\s+/g, "-")}`);
-    if (label) label.textContent = `${loc.available} ช่องว่าง`;
-  });
-}, 5000);
