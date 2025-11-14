@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Park with Me | Smart Parking</title>
 
   <!-- Leaflet CSS -->
@@ -12,18 +12,39 @@
 <body>
   <!-- ===== Header ===== -->
   <header class="top-bar">
-    <F1>Park with Me</F1>
-    <button class="menu-btn">☰</button>
+    <h1>Park with Me</h1>
+    <div class="top-bar-actions">
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn secondary" id="loginButton">Log In</button>
+        <button class="auth-btn primary" id="signupButton">Sign Up</button>
+      </div>
+      <div class="profile-menu hidden" id="profileMenu">
+        <button class="profile-trigger" id="profileButton" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-initials" id="profileInitials">PW</span>
+        </button>
+        <div class="profile-dropdown" id="profileDropdown" role="menu">
+          <div class="profile-overview">
+            <div class="profile-name" id="profileName">Park with Me User</div>
+            <div class="profile-email" id="profileEmail">guest@example.com</div>
+          </div>
+          <button class="dropdown-item" onclick="goToProfile()" role="menuitem">Personal Information</button>
+          <button class="dropdown-item" onclick="goToMybooking()" role="menuitem">My Booking</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="logout()" role="menuitem">Sign Out</button>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <!-- ===== Search Bar ===== -->
+  <!-- ===== Search ===== -->
   <div class="search-bar">
-    <input type="text" placeholder="ค้นหาที่จอดรถ..." />
+    <input type="text" id="searchInput" placeholder="Search parking locations..." />
   </div>
 
   <!-- ===== Map ===== -->
   <div id="map"></div>
 
+  <!-- ===== Scripts ===== -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>

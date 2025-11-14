@@ -464,7 +464,7 @@
   <div class="price-amount" id="priceAmount">$0</div>
   <div id="timeSummary" style="margin-top:10px;font-size:14px;color:#fff;"></div>
 </div>
-
+      </div>
 
       <button id="confirmBtn" class="confirm-btn" disabled>Confirm Booking</button>
     </div>
@@ -478,6 +478,8 @@
       <button class="modal-btn" onclick="closeModal()">Done</button>
     </div>
   </div>
+
+  
 
   <!-- <script>
     const params = new URLSearchParams(window.location.search);
@@ -635,6 +637,7 @@ window.addEventListener("DOMContentLoaded", loadParkingSlots);
         `Space ${selectedSlot} booked successfully for ${selectedHours} hour${selectedHours > 1 ? 's' : ''} at ${place}. Total: ${total}฿`;
       document.getElementById("successModal").classList.add("active");
     } else {
+        // ถ้ายังไม่ได้ล็อกอินให้ไปหน้า login.html
       alert("เกิดข้อผิดพลาดในการจอง: " + (result.message || "Unknown error"));
     }
   } catch (error) {
@@ -661,7 +664,7 @@ window.addEventListener("DOMContentLoaded", loadParkingSlots);
   const lotMapping = {
     "SIIT Parking A1": "siit_a1",
     "SIIT Parking A2": "siit_a2",
-    // เพิ่มได้ภายหลัง เช่น "SIIT Parking B1": "siit_b1"
+    "SIIT BKD": "siit_bkd",
   };
 
   const params = new URLSearchParams(window.location.search);
@@ -750,7 +753,11 @@ window.addEventListener("DOMContentLoaded", loadParkingSlots);
 
   // ✅ 5. ตรวจสอบการล็อกอิน
   function checkLoginStatus() {
-    return localStorage.getItem("isLoggedIn") === "true";
+    const isLoggedIn = localStorage.getItem("loggedIn");
+    if (isLoggedIn === "true") {
+        return true;
+      }
+      return false;
   }
 
   // ✅ 6. ฟังก์ชันจองที่จอด (ส่งไป Lambda)

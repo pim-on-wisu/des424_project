@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Information | Park with Me</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <h1>Park with Me</h1>
+    <div class="top-bar-actions">
+      <div class="auth-buttons" id="authButtons">
+        <button class="auth-btn secondary" id="loginButton">Log In</button>
+        <button class="auth-btn primary" id="signupButton">Sign Up</button>
+      </div>
+      <button class="auth-btn secondary" id="bookingPageButton">Booking</button>
+      <div class="profile-menu hidden" id="profileMenu">
+        <button class="profile-trigger" id="profileButton" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-initials" id="profileInitials">PW</span>
+        </button>
+        <div class="profile-dropdown" id="profileDropdown" role="menu">
+          <div class="profile-overview">
+            <div class="profile-name" id="profileName">Park with Me User</div>
+            <div class="profile-email" id="profileEmail">guest@example.com</div>
+          </div>
+          <button class="dropdown-item" onclick="goToProfile()" role="menuitem">Personal Information</button>
+          <button class="dropdown-item" onclick="goToMyBooking()" role="menuitem">My Booking</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="logout()" role="menuitem">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="profile-page">
+    <div class="status-banner info" id="profileStatus"></div>
+    <section class="profile-card" id="personalInfoCard">
+      <h2>Your Profile</h2>
+      <div class="profile-meta">
+        <span id="accountCreated">Member since N/A</span>
+        <span id="accountVehicleCount">0 vehicles stored</span>
+      </div>
+      <div class="profile-details">
+        <div class="profile-detail">
+          <span class="profile-detail-label">Username</span>
+          <span class="profile-detail-value" id="accountUsername">-</span>
+        </div>
+        <div class="profile-detail">
+          <span class="profile-detail-label">Email</span>
+          <span class="profile-detail-value" id="accountEmail">-</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card">
+      <h2>Registered Vehicles</h2>
+      <div class="empty-state hidden" id="vehicleEmptyState">
+        Add your first vehicle to make booking even faster.
+      </div>
+      <div class="vehicle-list" id="vehicleList"></div>
+    </section>
+
+    <section class="profile-card">
+      <h2>Add a New Vehicle</h2>
+      <form class="add-car-form" id="addCarForm">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="newLicensePlate">License Plate</label>
+            <input type="text" id="newLicensePlate" name="newLicensePlate" placeholder="e.g. ABC 1234" required />
+          </div>
+          <div class="form-field">
+            <label for="newCarType">Car Type</label>
+            <select id="newCarType" name="newCarType" required>
+              <option value="">Select car type</option>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Pickup">Pickup</option>
+              <option value="Motorcycle">Motorcycle</option>
+              <option value="Van">Van</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="newCarBrand">Brand</label>
+            <input type="text" id="newCarBrand" name="newCarBrand" placeholder="e.g. Toyota" required />
+          </div>
+          <div class="form-field">
+            <label for="newCarModel">Model</label>
+            <input type="text" id="newCarModel" name="newCarModel" placeholder="e.g. Camry" required />
+          </div>
+          <div class="form-field">
+            <label for="newCarColor">Color</label>
+            <input type="text" id="newCarColor" name="newCarColor" placeholder="e.g. Black" required />
+          </div>
+        </div>
+        <button type="submit" class="add-car-btn">Add Vehicle</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusBanner = document.getElementById('profileStatus');
+      const accountUsername = document.getElementById('accountUsername');
+      const accountEmail = document.getElementById('accountEmail');
+      const accountCreated = document.getElementById('accountCreated');
+      const accountVehicleCount = document.getElementById('accountVehicleCount');
+      const vehicleList = document.getElementById('vehicleList');
+      const vehicleEmptyState = document.getElementById('vehicleEmptyState');
+      const addCarForm = document.getElementById('addCarForm');
+      const newLicensePlateInput = document.getElementById('newLicensePlate');
+      const newCarTypeInput = document.getElementById('newCarType');
+      const newCarBrandInput = document.getElementById('newCarBrand');
+      const newCarModelInput = document.getElementById('newCarModel');
+      const newCarColorInput = document.getElementById('newCarColor');
+
+      const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+
+      let userData;
+      try {
+        userData = JSON.parse(localStorage.getItem('userData') || '{}');
+      } catch (error) {
+        console.error('Unable to read user data:', error);
+        userData = {};
+      }
+
+      if (!isLoggedIn) {
+        showStatus('Please log in to manage your profile.', 'info', 0);
+      } else if (!userData || Object.keys(userData).length === 0) {
+        showStatus('Complete signup to personalize your profile.', 'info', 0);
+      }
+
+      const vehicles = Array.isArray(userData.vehicles) ? [...userData.vehicles] : [];
+
+      accountUsername.textContent = userData.username || 'Guest';
+      let email = userData.email || localStorage.getItem('userEmail') || '';
+      if (!email) {
+        email = 'guest@example.com';
+      }
+      accountEmail.textContent = email;
+      if (!userData.email && email !== 'guest@example.com') {
+        userData.email = email;
+      }
+
+      if (userData.createdAt) {
+        const createdDate = new Date(userData.createdAt);
+        if (!Number.isNaN(createdDate.valueOf())) {
+          accountCreated.textContent = 'Member since ' + createdDate.toLocaleDateString();
+        }
+      }
+
+      function updateVehicleCount() {
+        if (!accountVehicleCount) return;
+        accountVehicleCount.textContent = vehicles.length + ' vehicle' + (vehicles.length === 1 ? '' : 's') + ' stored';
+      }
+
+      function renderVehicles() {
+        if (!vehicleList) return;
+        vehicleList.innerHTML = '';
+
+        if (!vehicles.length) {
+          if (vehicleEmptyState) {
+            vehicleEmptyState.classList.remove('hidden');
+          }
+          updateVehicleCount();
+          return;
+        }
+
+        if (vehicleEmptyState) {
+          vehicleEmptyState.classList.add('hidden');
+        }
+
+        vehicles.forEach((vehicle) => {
+          const item = document.createElement('div');
+          item.className = 'vehicle-item';
+
+          const header = document.createElement('div');
+          header.className = 'vehicle-header';
+
+          const plate = document.createElement('span');
+          plate.className = 'vehicle-plate';
+          plate.textContent = vehicle.licensePlate || 'N/A';
+
+          const type = document.createElement('span');
+          type.className = 'vehicle-type';
+          type.textContent = vehicle.type || 'Vehicle';
+
+          header.appendChild(plate);
+          header.appendChild(type);
+
+          const meta = document.createElement('div');
+          meta.className = 'vehicle-meta';
+
+          const brandSpan = document.createElement('span');
+          const brandLabel = document.createElement('strong');
+          brandLabel.textContent = 'Brand:';
+          brandSpan.appendChild(brandLabel);
+          brandSpan.appendChild(document.createTextNode(' ' + (vehicle.brand || 'N/A')));
+
+          const modelSpan = document.createElement('span');
+          const modelLabel = document.createElement('strong');
+          modelLabel.textContent = 'Model:';
+          modelSpan.appendChild(modelLabel);
+          modelSpan.appendChild(document.createTextNode(' ' + (vehicle.model || 'N/A')));
+
+          const colorSpan = document.createElement('span');
+          const colorLabel = document.createElement('strong');
+          colorLabel.textContent = 'Color:';
+          colorSpan.appendChild(colorLabel);
+          colorSpan.appendChild(document.createTextNode(' ' + (vehicle.color || 'N/A')));
+
+          meta.appendChild(brandSpan);
+          meta.appendChild(modelSpan);
+          meta.appendChild(colorSpan);
+
+          item.appendChild(header);
+          item.appendChild(meta);
+
+          vehicleList.appendChild(item);
+        });
+
+        updateVehicleCount();
+      }
+
+      function showStatus(message, type = 'success', timeout = 3500) {
+        if (!statusBanner) return;
+        statusBanner.textContent = message;
+        statusBanner.className = 'status-banner active ' + type;
+
+        if (timeout > 0) {
+          setTimeout(() => {
+            statusBanner.className = 'status-banner';
+          }, timeout);
+        }
+      }
+
+      renderVehicles();
+      updateVehicleCount();
+
+      if (addCarForm) {
+        addCarForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+
+          const newVehicle = {
+            licensePlate: (newLicensePlateInput?.value || '').trim().toUpperCase(),
+            type: newCarTypeInput?.value || '',
+            brand: (newCarBrandInput?.value || '').trim(),
+            model: (newCarModelInput?.value || '').trim(),
+            color: (newCarColorInput?.value || '').trim(),
+          };
+
+          if (!newVehicle.licensePlate || !newVehicle.type || !newVehicle.brand || !newVehicle.model || !newVehicle.color) {
+            showStatus('Please fill in all required fields.', 'info');
+            return;
+          }
+
+          vehicles.push(newVehicle);
+          userData.vehicles = vehicles;
+
+          try {
+            localStorage.setItem('userData', JSON.stringify(userData));
+            renderVehicles();
+            addCarForm.reset();
+            showStatus('Vehicle added successfully.');
+          } catch (error) {
+            console.error('Unable to save vehicle:', error);
+            showStatus('Could not save vehicle. Please try again.', 'info');
+          }
+        });
+      }
+
+    });
+  </script>
+</body>
+</html>
