@@ -49,7 +49,8 @@ async function fetchParkingLotsInfo() {
     const json = await response.json();
     
     // ⭐ FIX: Extract 'data' array from the parsed body
-    const lots = JSON.parse(json.body).data; 
+    //const lots = JSON.parse(json.body).data; 
+    const lots = json.data;
 
     // 🧠 FIX: Data is Normal JSON (from DocumentClient), no .S or .N needed
     lots.forEach(item => {
@@ -80,8 +81,8 @@ async function fetchParkingData() {
     const json = await response.json();
     
     // ⭐⭐ FIX: Extract 'data' array from the parsed body
-    // This is line 85
-    const slots = JSON.parse(json.body).data; 
+    //const slots = JSON.parse(json.body).data; 
+    const slots = json.data;
 
     // reset available
     customLocations.forEach(loc => loc.available = 0);
