@@ -1,4 +1,5 @@
-// ===== Initialize Leaflet Map =====
+if (document.getElementById("map")) {
+  // ===== Initialize Leaflet Map =====
 const map = L.map("map").setView([14.0745, 100.6065], 15);
 
 // ===== Tile Layer =====
@@ -179,10 +180,7 @@ function goToBooking(place, lot_id) {
   await fetchParkingData();       // 2. โหลด real-time free slots (Recalculate)
   setInterval(fetchParkingData, 10000); // 3. โหลดซ้ำทุก 10 วิ
 })();
-
-//
-// --- ⬇️ MERGED FROM SCRIPT2.JS (Auth UI Logic) ⬇️ ---
-//
+}
 
 // --- Auth UI Logic ---
 const authButtons = document.getElementById("authButtons");
@@ -315,6 +313,6 @@ function logout() {
   localStorage.removeItem("previousPage");
   closeProfileDropdown();
   initializeAuthUI(); // อัปเดต UI ทันที
-  alert("You have been signed out successfully!");
+  //alert("You have been signed out successfully!");
   window.location.reload(); 
 }

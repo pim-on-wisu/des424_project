@@ -755,8 +755,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 4. บันทึกสถานะลง localStorage
             localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("username", loginData.username);
-            localStorage.setItem("userData", JSON.stringify(loginData)); // บันทึกข้อมูลรถ ฯลฯ
+            localStorage.setItem("username", loginData.username); // <--- แก้ไข
+            localStorage.setItem("userData", JSON.stringify(loginData));
 
             // 5. กลับไปหน้าเดิม
             const redirectUrl = localStorage.getItem("previousPage") || "index.html";

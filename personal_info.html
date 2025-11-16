@@ -8,7 +8,7 @@
 </head>
 <body>
   <header class="top-bar">
-    <h1>Park with Me</h1>
+  <h1><a href="index.html">Park with Me</a></h1>
     <div class="top-bar-actions">
       <div class="auth-buttons" id="authButtons">
         <button class="auth-btn secondary" id="loginButton">Log In</button>
@@ -102,22 +102,21 @@
   <!-- ❗ script.js (ที่รวมไฟล์ script2.js แล้ว) ต้องถูกโหลด -->
   <script src="script.js"></script>
   
-  <script>
+<script>
     // ⭐ Script นี้จะทำงานหลังจาก script.js โหลด
     document.addEventListener('DOMContentLoaded', () => {
       
-      // 1. ตรวจสอบสถานะล็อกอิน
+      // 1. ตรวจสอบสถานะล็อกอิน (เหมือนเดิม)
       const isLoggedIn = localStorage.getItem("loggedIn") === "true";
       const userDataRaw = localStorage.getItem("userData");
       
       if (!isLoggedIn || !userDataRaw) {
-          // ถ้ายังไม่ล็อกอิน หรือไม่มีข้อมูล ให้เด้งไปหน้า login
           localStorage.setItem("previousPage", window.location.href);
           window.location.href = "login.html";
           return;
       }
 
-      // 2. ดึง Element ที่จะแสดงผล
+      // 2. ดึง Element (เหมือนเดิม)
       const statusBanner = document.getElementById('profileStatus');
       const accountUsername = document.getElementById('accountUsername');
       const accountEmail = document.getElementById('accountEmail');
@@ -130,7 +129,6 @@
         userData = JSON.parse(userDataRaw);
       } catch (e) {
         console.error("Could not parse user data", e);
-        // (เด้งไปหน้า login ถ้าข้อมูลพัง)
         localStorage.removeItem("loggedIn");
         localStorage.removeItem("userData");
         window.location.href = "login.html";
@@ -139,32 +137,22 @@
       
       showStatus(`Welcome, ${userData.username}! Your profile is loaded.`, 'success', 3500);
 
-      // 3. แสดงข้อมูล Profile
+      // 3. แสดงข้อมูล Profile (เหมือนเดิม)
       accountUsername.textContent = userData.username || 'N/A';
       accountEmail.textContent = userData.email || 'N/A';
 
-      // 4. สร้าง "vehicles" array จากข้อมูลที่ได้ตอน Login/Signup
-      // (Script เดิมของคุณมองหา 'vehicles' array แต่ login/signup ของเราเก็บเป็น top-level)
-      const vehicles = [];
-      if (userData.license_plate) {
-          vehicles.push({
-              licensePlate: userData.license_plate,
-              type: userData.car_type,
-              brand: userData.car_brand,
-              model: userData.car_model,
-              color: userData.car_color
-          });
-      }
       
-      // (ส่วนนี้ดึงจาก 'vehicles' array หากผู้ใช้กด "Add Vehicle" ในหน้านี้)
-      if (Array.isArray(userData.vehicles)) {
-          vehicles.push(...userData.vehicles);
-      }
-
-      // 5. แสดงผล Vehicle
+      // 4. (ส่วนนี้ไม่จำเป็นแล้ว เพราะเราจะใช้ userData.vehicles โดยตรง)
+      // const vehicles = []; ...
+      
+      
+      // 5. ✅ [แก้ไข] แสดงผล Vehicle (ให้อ่านจาก userData.vehicles)
       function renderVehicles() {
         if (!vehicleList) return;
-        vehicleList.innerHTML = ''; // เคลียร์ของเก่า
+        vehicleList.innerHTML = ''; 
+
+        // ❗ อ่านจาก 'userData.vehicles' ซึ่งตอนนี้ควรจะเป็น List
+        const vehicles = userData.vehicles || []; 
 
         if (vehicles.length === 0) {
           vehicleEmptyState.classList.remove('hidden');
@@ -194,10 +182,13 @@
         });
       }
 
-      // 6. (ส่วนฟอร์ม "Add a New Vehicle" - ยังคงทำงานเหมือนเดิม)
+      // 6. ✅ [แก้ไข] ฟอร์ม "Add a New Vehicle" ให้ยิง API
       const addCarForm = document.getElementById('addCarForm');
-      addCarForm.addEventListener('submit', (event) => {
+      
+      // ❗ เปลี่ยนเป็น async function
+      addCarForm.addEventListener('submit', async (event) => { 
           event.preventDefault();
+          
           const newVehicle = {
               licensePlate: document.getElementById('newLicensePlate').value.trim().toUpperCase(),
               type: document.getElementById('newCarType').value,
@@ -211,20 +202,39 @@
               return;
           }
           
-          // (บันทึกลง localStorage 'userData.vehicles' array)
-          if (!Array.isArray(userData.vehicles)) {
-              userData.vehicles = [];
+          try {
+            // ❗ ยิง Fetch ไปที่ API ใหม่
+            const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/addvehicle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: userData.username, // ส่ง username
+                    vehicle: newVehicle         // ส่ง object รถคันใหม่
+                })
+            });
+
+            const updatedUserData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(updatedUserData.message || "Failed to add vehicle");
+            }
+            
+            // ❗ [สำเร็จ] อัปเดต localStorage ด้วยข้อมูลใหม่ที่ได้จาก Lambda
+            localStorage.setItem('userData', JSON.stringify(updatedUserData));
+            userData = updatedUserData; // อัปเดตตัวแปร userData ที่ใช้ในหน้านี้
+            
+            renderVehicles(); // วาดหน้าใหม่
+            addCarForm.reset();
+            showStatus('Vehicle added successfully!', 'success');
+
+          } catch (error) {
+              console.error("Add vehicle error:", error);
+              showStatus(`Error: ${error.message}`, 'error');
           }
-          userData.vehicles.push(newVehicle);
-          vehicles.push(newVehicle); // อัปเดต array ที่ใช้แสดงผล
-          
-          localStorage.setItem('userData', JSON.stringify(userData));
-          renderVehicles();
-          addCarForm.reset();
-          showStatus('Vehicle added locally.', 'success');
       });
 
       function showStatus(message, type = 'success', timeout = 3500) {
+        // (โค้ด showStatus เหมือนเดิม)
         if (!statusBanner) return;
         statusBanner.textContent = message;
         statusBanner.className = 'status-banner active ' + type;
@@ -236,14 +246,14 @@
         }
       }
 
-      // 7. แสดงผลทั้งหมด
+      // 7. แสดงผลทั้งหมด (เหมือนเดิม)
       renderVehicles();
       
-      // (เรียก initializeAuthUI จาก script.js เพื่ออัปเดต Profile icon บน Header)
       if (typeof initializeAuthUI === 'function') {
         initializeAuthUI();
       }
     });
   </script>
+
 </body>
 </html>

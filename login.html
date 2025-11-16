@@ -332,11 +332,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         if (res.ok) { // Status 200-299
             // ⭐ บันทึกสถานะและข้อมูลผู้ใช้เมื่อ Login สำเร็จ
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("username", data.username); 
-            localStorage.setItem("userData", JSON.stringify(data)); // เก็บข้อมูลรถ ฯลฯ
+           localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("username", data.username); // <--- แก้ไข
+            localStorage.setItem("userData", JSON.stringify(data));
 
-            alert("✅ Login successful!");
+            //alert("✅ Login successful!");
             
             // ⭐ กลับไปหน้าเดิม (index.html หรือ booking.html)
             const redirectUrl = localStorage.getItem("previousPage") || "index.html";
