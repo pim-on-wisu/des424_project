@@ -358,6 +358,249 @@
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
+    /* Extend Time Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      animation: scaleIn 0.3s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .modal-content h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #1f2937;
+    }
+
+    .modal-subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .extend-info {
+      background: #f9fafb;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .extend-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .extend-info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .extend-label {
+      color: #6b7280;
+    }
+
+    .extend-value {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .slider-container {
+      margin-bottom: 24px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .slider-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .time-slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, 
+        #667eea 0%, 
+        #667eea var(--slider-progress, 0%), 
+        #e5e7eb var(--slider-progress, 0%), 
+        #e5e7eb 100%);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .time-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      transition: all 0.2s;
+    }
+
+    .time-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .time-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      transition: all 0.2s;
+    }
+
+    .time-slider::-moz-range-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .time-markers {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding: 0 4px;
+    }
+
+    .time-marker {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .price-preview {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .price-preview-label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    .price-preview-amount {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .price-breakdown {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 15px;
+    }
+
+    .modal-btn.cancel {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .modal-btn.cancel:hover {
+      background: #e5e7eb;
+    }
+
+    .modal-btn.confirm {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .modal-btn.confirm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 16px;
@@ -421,6 +664,66 @@
     <div id="bookingsList" class="bookings-list"></div>
   </div>
 
+  <!-- Extend Time Modal -->
+  <div id="extendModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon">⏱️</div>
+        <h3>Extend Parking Time</h3>
+        <p class="modal-subtitle">Add more hours to your parking session</p>
+      </div>
+
+      <div class="extend-info">
+        <div class="extend-info-row">
+          <span class="extend-label">Location:</span>
+          <span class="extend-value" id="extendLocation">-</span>
+        </div>
+        <div class="extend-info-row">
+          <span class="extend-label">Space:</span>
+          <span class="extend-value" id="extendSpace">-</span>
+        </div>
+        <div class="extend-info-row">
+          <span class="extend-label">Current End Time:</span>
+          <span class="extend-value" id="extendCurrentEnd">-</span>
+        </div>
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-header">
+          <span class="slider-label">Additional Hours</span>
+          <span class="slider-value" id="sliderValue">1 hr</span>
+        </div>
+        <input 
+          type="range" 
+          class="time-slider" 
+          id="timeSlider" 
+          min="1" 
+          max="12" 
+          value="1" 
+          step="1"
+        >
+        <div class="time-markers">
+          <span class="time-marker">1h</span>
+          <span class="time-marker">3h</span>
+          <span class="time-marker">6h</span>
+          <span class="time-marker">9h</span>
+          <span class="time-marker">12h</span>
+        </div>
+      </div>
+
+      <div class="price-preview">
+        <div class="price-preview-label">Additional Cost</div>
+        <div class="price-preview-amount" id="additionalPrice">฿50</div>
+        <div class="price-breakdown" id="priceBreakdown">฿50 × 1 hour</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeExtendModal()">Cancel</button>
+        <button class="modal-btn confirm" onclick="confirmExtend()">Confirm Extension</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Sample booking data - in production, fetch from backend
     let bookings = [
@@ -466,6 +769,8 @@
     ];
 
     let currentFilter = 'all';
+    let extendBookingId = null;
+    const pricePerHour = 50; // ฿50 per hour
 
     function loadBookings() {
       const bookingsList = document.getElementById('bookingsList');
@@ -534,7 +839,6 @@
               <button class="action-btn danger" onclick="cancelBooking(${booking.id})">Cancel</button>
             ` : booking.status === 'completed' ? `
               <button class="action-btn secondary" onclick="rebookParking(${booking.id})">Book Again</button>
-              <button class="action-btn secondary" onclick="viewReceipt(${booking.id})">View Receipt</button>
             ` : `
               <button class="action-btn secondary" onclick="rebookParking(${booking.id})">Book Again</button>
             `}
@@ -573,11 +877,73 @@
     }
 
     function extendBooking(id) {
+      extendBookingId = id;
       const booking = bookings.find(b => b.id === id);
-      if (confirm(`Extend parking time for ${booking.location}?`)) {
-        alert('Time extension feature would be implemented here');
-      }
+      
+      // Update modal information
+      document.getElementById('extendLocation').textContent = booking.location;
+      document.getElementById('extendSpace').textContent = booking.space;
+      document.getElementById('extendCurrentEnd').textContent = booking.endTime;
+      
+      // Reset slider
+      const slider = document.getElementById('timeSlider');
+      slider.value = 1;
+      updateSliderDisplay(1);
+      
+      // Show modal
+      document.getElementById('extendModal').classList.add('active');
     }
+
+    function closeExtendModal() {
+      document.getElementById('extendModal').classList.remove('active');
+      extendBookingId = null;
+    }
+
+    function updateSliderDisplay(hours) {
+      const sliderValue = document.getElementById('sliderValue');
+      const additionalPrice = document.getElementById('additionalPrice');
+      const priceBreakdown = document.getElementById('priceBreakdown');
+      const slider = document.getElementById('timeSlider');
+      
+      // Update text
+      sliderValue.textContent = hours === 1 ? '1 hr' : `${hours} hrs`;
+      const totalCost = pricePerHour * hours;
+      additionalPrice.textContent = `฿${totalCost}`;
+      priceBreakdown.textContent = `฿${pricePerHour} × ${hours} hour${hours > 1 ? 's' : ''}`;
+      
+      // Update slider gradient
+      const percentage = ((hours - 1) / 11) * 100;
+      slider.style.setProperty('--slider-progress', `${percentage}%`);
+    }
+
+    function confirmExtend() {
+      const booking = bookings.find(b => b.id === extendBookingId);
+      const hours = parseInt(document.getElementById('timeSlider').value);
+      const additionalCost = pricePerHour * hours;
+      
+      // Calculate new end time
+      const [endHour, endMinute] = booking.endTime.split(':').map(Number);
+      const newEndHour = (endHour + hours) % 24;
+      const newEndTime = `${String(newEndHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+      
+      // Update booking
+      booking.endTime = newEndTime;
+      booking.duration += hours;
+      booking.price += additionalCost;
+      
+      closeExtendModal();
+      loadBookings();
+      
+      alert(`Parking extended successfully!\nNew end time: ${newEndTime}\nAdditional cost: ฿${additionalCost}`);
+    }
+
+    // Slider event listener
+    document.addEventListener('DOMContentLoaded', () => {
+      const slider = document.getElementById('timeSlider');
+      slider.addEventListener('input', (e) => {
+        updateSliderDisplay(parseInt(e.target.value));
+      });
+    });
 
     function cancelBooking(id) {
       const booking = bookings.find(b => b.id === id);
