@@ -132,6 +132,15 @@
       perspective: 1000px;
     }
 
+    .parking-lot-message {
+      color: #6b7280; 
+      text-align: center; 
+      grid-column: 1 / -1;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 12px;
+    }
+
     .parking-space {
       aspect-ratio: 1;
       background: #10b981;
@@ -224,6 +233,16 @@
     .detail-value {
       color: #1f2937;
       font-weight: 600;
+    }
+
+    .time-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
     }
 
     .time-selector {
@@ -685,7 +704,7 @@ window.addEventListener("DOMContentLoaded", loadParkingSlots);
   // ✅ 2. โหลดข้อมูลช่องจอดจริงจาก AWS
   async function loadParkingSlots() {
     try {
-      const response = await fetch("https://555hmixbzg.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus");
+      const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus");
       const result = await response.json();
       const data = typeof result.body === "string" ? JSON.parse(result.body) : result;
 
@@ -780,7 +799,7 @@ window.addEventListener("DOMContentLoaded", loadParkingSlots);
     };
 
     try {
-      const response = await fetch("https://555hmixbzg.execute-api.ap-southeast-1.amazonaws.com/dev/bookParking", {
+      const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/bookParking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),

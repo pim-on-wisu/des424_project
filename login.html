@@ -266,7 +266,7 @@ h2 {
         <h2>Login</h2>
     </div>
     
-    <form action="dashboard.html" method="POST" id="loginForm">
+    <form id="loginForm">
         <div class="input-group">
             <label for="username">username</label>
             <div class="input-wrapper">
@@ -307,34 +307,54 @@ h2 {
 </div>
 
 <script>
-// Add form submission handling with loading state
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+// ⭐ API Endpoint (ชี้ไปที่ 0jcihmcez1)
+const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
+
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // หยุดการ submit ฟอร์มแบบเก่า
+    
     const loginBtn = document.getElementById('loginBtn');
     loginBtn.classList.add('loading');
-    
-    // Remove loading state after 2 seconds (or when form actually submits)
-    setTimeout(() => {
+    loginBtn.disabled = true;
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+        // ⭐ เรียก API Gateway POST /login
+        const res = await fetch(`${API_ENDPOINT}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) { // Status 200-299
+            // ⭐ บันทึกสถานะและข้อมูลผู้ใช้เมื่อ Login สำเร็จ
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("username", data.username); 
+            localStorage.setItem("userData", JSON.stringify(data)); // เก็บข้อมูลรถ ฯลฯ
+
+            alert("✅ Login successful!");
+            
+            // ⭐ กลับไปหน้าเดิม (index.html หรือ booking.html)
+            const redirectUrl = localStorage.getItem("previousPage") || "index.html";
+            localStorage.removeItem("previousPage"); // ล้างค่าหน้าเดิม
+            window.location.href = redirectUrl;
+            
+        } else { // Status 401, 404, 400
+            alert('❌ Login failed: ' + (data.message || data.error));
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Login API Error:", error);
         loginBtn.classList.remove('loading');
-    }, 2000);
+        loginBtn.disabled = false;
+        alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับระบบ');
+    }
 });
-
-// Add input focus animations
-document.querySelectorAll('.input-group input').forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.classList.add('focused');
-    });
-    
-    input.addEventListener('blur', function() {
-        this.parentElement.classList.remove('focused');
-    });
-});
-
-// ตัวอย่างการตั้งค่าเมื่อผู้ใช้ล็อกอินสำเร็จ
-function login() {
-  // สมมติว่าได้ทำการตรวจสอบชื่อผู้ใช้และรหัสผ่านเรียบร้อยแล้ว
-  localStorage.setItem("isLoggedIn", "true");
-  window.location.href = "index.html";  // เปลี่ยนหน้าไปยังหน้าหลักหลังจากล็อกอินสำเร็จ
-}
 
 </script>
 </body>

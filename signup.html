@@ -467,7 +467,7 @@ h2 {
         </div>
     </div>
     
-    <form action="dashboard.html" method="POST" id="signupForm" novalidate>
+    <form id="signupForm" novalidate>
         <!-- Personal Information Section -->
         <div class="form-section">
             <div class="section-title">
@@ -597,7 +597,10 @@ h2 {
 </div>
 
 <script>
-// Form validation and interactivity
+// ⭐ API Endpoint (ชี้ไปที่ 0jcihmcez1)
+const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
+
+// --- Form validation and interactivity (โค้ดเดิมของคุณ) ---
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('signupForm');
     const signupBtn = document.getElementById('signupBtn');
@@ -605,14 +608,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputs = form.querySelectorAll('input[required], select[required]');
     const termsCheckbox = document.getElementById('terms');
     
-    // Password strength checker
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirm-password');
     const passwordStrength = document.getElementById('passwordStrength');
     const strengthBar = document.getElementById('strengthBar');
     const passwordMatch = document.getElementById('passwordMatch');
     
-    // Update progress bar
+    // --- Update progress bar ---
     function updateProgress() {
         let filledInputs = 0;
         inputs.forEach(input => {
@@ -626,7 +628,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const progress = (filledInputs / inputs.length) * 100;
         progressFill.style.width = progress + '%';
         
-        // Enable/disable submit button
         const allValid = Array.from(inputs).every(input => {
             if (input.type === 'checkbox') return input.checked;
             return input.value.trim() !== '' && input.checkValidity();
@@ -635,16 +636,14 @@ document.addEventListener('DOMContentLoaded', function() {
         signupBtn.disabled = !allValid;
     }
     
-    // Password strength validation
+    // --- Password strength validation ---
     function checkPasswordStrength(pass) {
         let strength = 0;
-        
         if (pass.length >= 8) strength++;
         if (pass.match(/[a-z]/)) strength++;
         if (pass.match(/[A-Z]/)) strength++;
         if (pass.match(/[0-9]/)) strength++;
         if (pass.match(/[^a-zA-Z0-9]/)) strength++;
-        
         return strength;
     }
     
@@ -655,13 +654,9 @@ document.addEventListener('DOMContentLoaded', function() {
         passwordStrength.classList.add('visible');
         strengthBar.className = 'strength-bar';
         
-        if (strength < 3) {
-            strengthBar.classList.add('strength-weak');
-        } else if (strength < 4) {
-            strengthBar.classList.add('strength-medium');
-        } else {
-            strengthBar.classList.add('strength-strong');
-        }
+        if (strength < 3) strengthBar.classList.add('strength-weak');
+        else if (strength < 4) strengthBar.classList.add('strength-medium');
+        else strengthBar.classList.add('strength-strong');
         
         updateProgress();
         checkPasswordMatch();
@@ -672,9 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordMatch.classList.remove('visible');
             return;
         }
-        
         passwordMatch.classList.add('visible');
-        
         if (password.value === confirmPassword.value) {
             passwordMatch.textContent = '✓ รหัสผ่านตรงกัน';
             passwordMatch.className = 'password-match visible match';
@@ -683,13 +676,11 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordMatch.className = 'password-match visible no-match';
         }
     }
-    
     confirmPassword.addEventListener('input', checkPasswordMatch);
-    
-    // Email validation
+
+    // --- Other Validations ---
     const email = document.getElementById('email');
     const emailValidation = document.getElementById('emailValidation');
-    
     email.addEventListener('blur', function() {
         if (this.value && !this.checkValidity()) {
             emailValidation.textContent = 'กรุณาใส่อีเมล์ที่ถูกต้อง';
@@ -698,23 +689,17 @@ document.addEventListener('DOMContentLoaded', function() {
             emailValidation.classList.remove('visible');
         }
     });
-    
-    // License plate validation
+
     const licensePlate = document.getElementById('license-plate');
-    const licensePlateValidation = document.getElementById('licensePlateValidation');
+    licensePlate.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
     
-    licensePlate.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
-    
-    // Add event listeners to all inputs
     inputs.forEach(input => {
         input.addEventListener('input', updateProgress);
         input.addEventListener('change', updateProgress);
     });
     
-    // Form submission
-    form.addEventListener('submit', function(e) {
+    // --- ⭐ Form Submission (Connecting to AWS) ---
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         if (password.value !== confirmPassword.value) {
@@ -724,23 +709,71 @@ document.addEventListener('DOMContentLoaded', function() {
         
         signupBtn.classList.add('loading');
         signupBtn.textContent = '';
-        
-        // Simulate form submission
-        setTimeout(() => {
-            alert('สมัครสมาชิกสำเร็จ!');
-            // window.location.href = 'dashboard.html';
-        }, 2000);
+        signupBtn.disabled = true;
+
+        // 1. รวบรวมข้อมูลจากฟอร์ม
+        const userData = {
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+            email: document.getElementById('email').value.trim(),
+            license_plate: document.getElementById('license-plate').value,
+            car_type: document.getElementById('car-type').value,
+            car_brand: document.getElementById('car-brand').value,
+            car_model: document.getElementById('car-model').value,
+            car_color: document.getElementById('car-color').value,
+        };
+
+        try {
+            // 2. เรียก API /signup
+            const signupRes = await fetch(`${API_ENDPOINT}/signup`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData),
+            });
+
+            const signupResult = await signupRes.json();
+
+            if (!signupRes.ok) {
+                // ถ้าสมัครไม่สำเร็จ (เช่น Username ซ้ำ)
+                throw new Error(signupResult.message || signupResult.error || "Signup failed");
+            }
+
+            // 3. ถ้าสมัครสำเร็จ -> ล็อกอินอัตโนมัติ
+            alert('✅ สมัครสมาชิกสำเร็จ! กำลังเข้าสู่ระบบ...');
+
+            const loginRes = await fetch(`${API_ENDPOINT}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: userData.username, password: userData.password }),
+            });
+            
+            const loginData = await loginRes.json();
+            
+            if (!loginRes.ok) {
+                throw new Error(loginData.message || loginData.error || "Auto-login failed");
+            }
+
+            // 4. บันทึกสถานะลง localStorage
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("username", loginData.username);
+            localStorage.setItem("userData", JSON.stringify(loginData)); // บันทึกข้อมูลรถ ฯลฯ
+
+            // 5. กลับไปหน้าเดิม
+            const redirectUrl = localStorage.getItem("previousPage") || "index.html";
+            localStorage.removeItem("previousPage"); // ล้างค่า
+            window.location.href = redirectUrl;
+
+        } catch (error) {
+            console.error("Signup/Login Error:", error);
+            alert("❌ เกิดข้อผิดพลาด: " + error.message);
+            signupBtn.classList.remove('loading');
+            signupBtn.textContent = 'Sign up';
+            updateProgress(); // Re-enable button if valid
+        }
     });
     
     // Initialize progress
     updateProgress();
-});
-
-// Add smooth scrolling for better UX
-document.querySelectorAll('input, select').forEach(element => {
-    element.addEventListener('focus', function() {
-        this.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
 });
 </script>
 </body>

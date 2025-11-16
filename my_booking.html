@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Bookings | Park with Me</title>
   <style>
+    /* (CSS ทั้งหมดของคุณอยู่ที่นี่ - ไม่ได้เปลี่ยนแปลง) */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -411,67 +412,71 @@
 
     <!-- Filter Tabs -->
     <div class="filter-tabs">
-      <button class="filter-tab active" onclick="filterBookings('all')">All</button>
-      <button class="filter-tab" onclick="filterBookings('active')">Active</button>
-      <button class="filter-tab" onclick="filterBookings('completed')">Completed</button>
-      <button class="filter-tab" onclick="filterBookings('cancelled')">Cancelled</button>
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="active">Active</button>
+      <button class="filter-tab" data-filter="completed">Completed</button>
+      <button class="filter-tab" data-filter="cancelled">Cancelled</button>
     </div>
 
     <!-- Bookings List -->
-    <div id="bookingsList" class="bookings-list"></div>
+    <div id="bookingsList" class="bookings-list">
+      <!-- Loading state or empty state will be shown here -->
+    </div>
   </div>
 
   <script>
-    // Sample booking data - in production, fetch from backend
-    let bookings = [
-      {
-        id: 1,
-        location: "Downtown Parking Plaza",
-        address: "123 Main Street, City Center",
-        space: "A12",
-        date: "2025-11-13",
-        startTime: "09:00",
-        endTime: "12:00",
-        duration: 3,
-        price: 150,
-        status: "active",
-        bookingDate: "2025-11-12"
-      },
-      {
-        id: 2,
-        location: "Central Mall Parking",
-        address: "456 Shopping Avenue",
-        space: "B05",
-        date: "2025-11-10",
-        startTime: "14:00",
-        endTime: "18:00",
-        duration: 4,
-        price: 200,
-        status: "completed",
-        bookingDate: "2025-11-09"
-      },
-      {
-        id: 3,
-        location: "Riverside Parking",
-        address: "789 River Road",
-        space: "C21",
-        date: "2025-11-08",
-        startTime: "10:00",
-        endTime: "13:00",
-        duration: 3,
-        price: 150,
-        status: "completed",
-        bookingDate: "2025-11-07"
-      }
-    ];
-
+    // ⭐ API Endpoint (ชี้ไปที่ 0jcihmcez1)
+    const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
+    
+    // ⭐ Global state
+    let allBookings = []; // เก็บข้อมูลจองทั้งหมดจาก DB
     let currentFilter = 'all';
+    
+    // ⭐ Mapping (เพื่อให้แสดงชื่อลานจอดสวยๆ)
+    const lotNames = {
+        "siit_a1": "SIIT Parking A1",
+        "siit_a2": "SIIT Parking A2",
+        "siit_bkd": "SIIT BKD",
+        // เพิ่มลานจอดอื่นๆ ที่นี่
+    };
 
-    function loadBookings() {
+    // ⭐ 1. Check Login Status
+    const username = localStorage.getItem("username");
+    if (!username) {
+        localStorage.setItem("previousPage", window.location.href);
+        window.location.href = "login.html";
+    }
+
+    // ⭐ 2. Fetch Bookings from AWS
+    async function fetchBookings() {
+        const bookingsList = document.getElementById('bookingsList');
+        bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Loading bookings...</div></div>`;
+
+        try {
+            const response = await fetch(`${API_ENDPOINT}/mybookings?user_id=${username}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            allBookings = await response.json();
+            
+            // เรียงข้อมูล (ใหม่สุดมาก่อน)
+            allBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+            
+            renderBookings(); // แสดงผลครั้งแรก
+            updateStats(); // อัปเดตสถิติ
+        } catch (error) {
+            console.error("Failed to fetch bookings:", error);
+            bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Could not load bookings</div><div class="empty-subtitle">${error.message}</div></div>`;
+        }
+    }
+
+    // ⭐ 3. Render Bookings (แสดงผลตาม filter)
+    function renderBookings() {
       const bookingsList = document.getElementById('bookingsList');
-      const filteredBookings = currentFilter === 'all' 
-        ? bookings 
-        : bookings.filter(b => b.status === currentFilter);
+      
+      const filteredBookings = currentFilter === 'all'
+        ? allBookings
+        : allBookings.filter(b => b.status === currentFilter);
 
       if (filteredBookings.length === 0) {
         bookingsList.innerHTML = `
@@ -485,12 +490,13 @@
         return;
       }
 
+      // ⭐ ใช้ Field (slot_id, start_time, price) จาก DynamoDB
       bookingsList.innerHTML = filteredBookings.map(booking => `
         <div class="booking-card ${booking.status}">
           <div class="booking-header">
             <div class="booking-location">
-              <div class="location-name">${booking.location}</div>
-              <div class="location-address">${booking.address}</div>
+              <div class="location-name">${lotNames[booking.lot_id] || booking.lot_id}</div>
+              <div class="location-address">${booking.slot_id}</div>
             </div>
             <div class="booking-status ${booking.status}">${booking.status}</div>
           </div>
@@ -499,7 +505,7 @@
             <div class="booking-banner">
               <div class="banner-info">
                 <div class="banner-title">Active Parking Session</div>
-                <div class="banner-subtitle">Started at ${booking.startTime}</div>
+                <div class="banner-subtitle">Started at ${formatTime(booking.start_time)}</div>
               </div>
               <div class="banner-price">฿${booking.price}</div>
             </div>
@@ -507,20 +513,20 @@
 
           <div class="booking-details">
             <div class="detail-item">
-              <div class="detail-label">Space</div>
-              <div class="detail-value">${booking.space}</div>
+              <div class="detail-label">Reservation ID</div>
+              <div class="detail-value" style="font-size: 12px;">${booking.reservation_id}</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Date</div>
-              <div class="detail-value">${formatDate(booking.date)}</div>
+              <div class="detail-value">${formatDate(booking.start_time)}</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Time</div>
-              <div class="detail-value">${booking.startTime} - ${booking.endTime}</div>
+              <div class="detail-value">${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Duration</div>
-              <div class="detail-value">${booking.duration} hrs</div>
+              <div class="detail-value">${booking.duration_hours} hrs</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Price</div>
@@ -530,71 +536,80 @@
 
           <div class="booking-actions">
             ${booking.status === 'active' ? `
-              <button class="action-btn primary" onclick="extendBooking(${booking.id})">Extend Time</button>
-              <button class="action-btn danger" onclick="cancelBooking(${booking.id})">Cancel</button>
+              <button class="action-btn danger" onclick="cancelBooking('${booking.reservation_id}')">Cancel Booking</button>
             ` : booking.status === 'completed' ? `
-              <button class="action-btn secondary" onclick="rebookParking(${booking.id})">Book Again</button>
-              <button class="action-btn secondary" onclick="viewReceipt(${booking.id})">View Receipt</button>
+              <button class="action-btn secondary" onclick="rebookParking('${booking.lot_id}')">Book Again</button>
             ` : `
-              <button class="action-btn secondary" onclick="rebookParking(${booking.id})">Book Again</button>
+              <button class="action-btn secondary" onclick="rebookParking('${booking.lot_id}')">Book Again</button>
             `}
           </div>
         </div>
       `).join('');
-
-      updateStats();
     }
 
+    // ⭐ 4. Update Stats
     function updateStats() {
-      const total = bookings.length;
-      const active = bookings.filter(b => b.status === 'active').length;
-      const totalSpent = bookings.reduce((sum, b) => sum + b.price, 0);
+      const total = allBookings.length;
+      const active = allBookings.filter(b => b.status === 'active').length;
+      const totalSpent = allBookings.reduce((sum, b) => sum + (b.price || 0), 0);
 
       document.getElementById('totalBookings').textContent = total;
       document.getElementById('activeBookings').textContent = active;
       document.getElementById('totalSpent').textContent = `฿${totalSpent}`;
     }
 
-    function filterBookings(filter) {
-      currentFilter = filter;
-      
-      // Update active tab
-      document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.classList.remove('active');
+    // ⭐ 5. Filter Logic
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+          currentFilter = e.target.dataset.filter;
+          document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          e.target.classList.add('active');
+          renderBookings();
       });
-      event.target.classList.add('active');
-
-      loadBookings();
-    }
-
+    });
+    
+    // ⭐ 6. Helper Functions
     function formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
+    
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
 
-    function extendBooking(id) {
-      const booking = bookings.find(b => b.id === id);
-      if (confirm(`Extend parking time for ${booking.location}?`)) {
-        alert('Time extension feature would be implemented here');
+    async function cancelBooking(reservationId) {
+      if (!confirm(`Are you sure you want to cancel this booking?`)) {
+        return;
+      }
+      
+      try {
+        // ❗ คุณต้องสร้าง Lambda 'cancelBooking' และ API 'POST /cancelbooking'
+        const response = await fetch(`${API_ENDPOINT}/cancelbooking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservation_id: reservationId })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Booking cancelled successfully!');
+            fetchBookings(); // โหลดข้อมูลใหม่
+        } else {
+            throw new Error(result.message || 'Failed to cancel');
+        }
+      } catch (error) {
+          console.error("Cancel error:", error);
+          alert(`Could not cancel booking: ${error.message}`);
       }
     }
 
-    function cancelBooking(id) {
-      const booking = bookings.find(b => b.id === id);
-      if (confirm(`Are you sure you want to cancel your booking at ${booking.location}?`)) {
-        booking.status = 'cancelled';
-        loadBookings();
-        alert('Booking cancelled successfully');
-      }
-    }
-
-    function rebookParking(id) {
-      const booking = bookings.find(b => b.id === id);
-      window.location.href = `booking.html?place=${encodeURIComponent(booking.location)}`;
-    }
-
-    function viewReceipt(id) {
-      alert('Receipt viewer would open here');
+    function rebookParking(lotId) {
+      // หาชื่อที่สวยงามจาก lotId
+      const placeName = lotNames[lotId] || 'Parking Lot';
+      window.location.href = `booking.html?place=${encodeURIComponent(placeName)}&lot_id=${lotId}`;
     }
 
     function goBack() {
@@ -605,14 +620,8 @@
       window.location.href = 'index.html';
     }
 
-    // Check login status
-    if (localStorage.getItem("loggedIn") !== "true") {
-      localStorage.setItem("previousPage", window.location.href);
-      window.location.href = "login.html";
-    }
-
-    // Load bookings on page load
-    loadBookings();
+    // ⭐ 7. Load bookings on page load
+    fetchBookings();
   </script>
 </body>
 </html>

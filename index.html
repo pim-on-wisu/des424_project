@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Park with Me | Smart Parking</title>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -46,6 +45,42 @@
 
   <!-- ===== Scripts ===== -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="script.js"></script>
+  <!-- โหลดไฟล์ script.js ที่รวมทุกอย่างแล้ว -->
+  <script src="script.js"></script> 
+  
+  <script>
+    // --- Navigation Logic for Auth Buttons ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginBtn = document.getElementById('loginButton');
+      const signupBtn = document.getElementById('signupButton');
+      
+      // 1. ตั้งค่าปุ่ม Login
+      if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+          localStorage.setItem("previousPage", "index.html");
+          window.location.href = 'login.html';
+        });
+      }
+
+      // 2. ตั้งค่าปุ่ม Signup
+      if (signupBtn) {
+        signupBtn.addEventListener('click', () => {
+          localStorage.setItem("previousPage", "index.html");
+          window.location.href = 'signup.html';
+        });
+      }
+
+      // 3. ⭐ FIX: เรียกใช้ฟังก์ชันตรวจสอบสถานะ Login (จาก script.js)
+      // ฟังก์ชันนี้จะสลับปุ่ม Login/Signup กับ Profile icon
+      if (typeof initializeAuthUI === 'function') {
+        initializeAuthUI();
+      }
+    });
+    // --- End Navigation Logic ---
+    
+    // ⭐ FIX: ลบฟังก์ชันที่ซ้ำซ้อนออก
+    // (ฟังก์ชัน goToProfile, goToMybooking, และ logout ถูกโหลดมาจาก script.js แล้ว)
+
+  </script>
 </body>
 </html>

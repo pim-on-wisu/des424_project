@@ -14,7 +14,7 @@
         <button class="auth-btn secondary" id="loginButton">Log In</button>
         <button class="auth-btn primary" id="signupButton">Sign Up</button>
       </div>
-      <button class="auth-btn secondary" id="bookingPageButton">Booking</button>
+      <!-- (ปุ่ม Booking ถูกลบออกจาก header นี้ เพราะปกติจะเข้าจาก Profile Dropdown) -->
       <div class="profile-menu hidden" id="profileMenu">
         <button class="profile-trigger" id="profileButton" aria-haspopup="true" aria-expanded="false">
           <span class="profile-initials" id="profileInitials">PW</span>
@@ -38,7 +38,7 @@
     <section class="profile-card" id="personalInfoCard">
       <h2>Your Profile</h2>
       <div class="profile-meta">
-        <span id="accountCreated">Member since N/A</span>
+        <span id="accountCreated">Welcome!</span>
         <span id="accountVehicleCount">0 vehicles stored</span>
       </div>
       <div class="profile-details">
@@ -55,14 +55,15 @@
 
     <section class="profile-card">
       <h2>Registered Vehicles</h2>
-      <div class="empty-state hidden" id="vehicleEmptyState">
-        Add your first vehicle to make booking even faster.
+      <div class="empty-state" id="vehicleEmptyState">
+        You have no vehicles registered.
       </div>
       <div class="vehicle-list" id="vehicleList"></div>
     </section>
 
+    <!-- (ส่วน Add a New Vehicle จะบันทึกลง localStorage ไปก่อน) -->
     <section class="profile-card">
-      <h2>Add a New Vehicle</h2>
+      <h2>Add a New Vehicle (Local Only)</h2>
       <form class="add-car-form" id="addCarForm">
         <div class="form-grid">
           <div class="form-field">
@@ -98,130 +99,130 @@
     </section>
   </main>
 
+  <!-- ❗ script.js (ที่รวมไฟล์ script2.js แล้ว) ต้องถูกโหลด -->
   <script src="script.js"></script>
+  
   <script>
+    // ⭐ Script นี้จะทำงานหลังจาก script.js โหลด
     document.addEventListener('DOMContentLoaded', () => {
+      
+      // 1. ตรวจสอบสถานะล็อกอิน
+      const isLoggedIn = localStorage.getItem("loggedIn") === "true";
+      const userDataRaw = localStorage.getItem("userData");
+      
+      if (!isLoggedIn || !userDataRaw) {
+          // ถ้ายังไม่ล็อกอิน หรือไม่มีข้อมูล ให้เด้งไปหน้า login
+          localStorage.setItem("previousPage", window.location.href);
+          window.location.href = "login.html";
+          return;
+      }
+
+      // 2. ดึง Element ที่จะแสดงผล
       const statusBanner = document.getElementById('profileStatus');
       const accountUsername = document.getElementById('accountUsername');
       const accountEmail = document.getElementById('accountEmail');
-      const accountCreated = document.getElementById('accountCreated');
       const accountVehicleCount = document.getElementById('accountVehicleCount');
       const vehicleList = document.getElementById('vehicleList');
       const vehicleEmptyState = document.getElementById('vehicleEmptyState');
-      const addCarForm = document.getElementById('addCarForm');
-      const newLicensePlateInput = document.getElementById('newLicensePlate');
-      const newCarTypeInput = document.getElementById('newCarType');
-      const newCarBrandInput = document.getElementById('newCarBrand');
-      const newCarModelInput = document.getElementById('newCarModel');
-      const newCarColorInput = document.getElementById('newCarColor');
-
-      const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
-
-      let userData;
+      
+      let userData = {};
       try {
-        userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      } catch (error) {
-        console.error('Unable to read user data:', error);
-        userData = {};
+        userData = JSON.parse(userDataRaw);
+      } catch (e) {
+        console.error("Could not parse user data", e);
+        // (เด้งไปหน้า login ถ้าข้อมูลพัง)
+        localStorage.removeItem("loggedIn");
+        localStorage.removeItem("userData");
+        window.location.href = "login.html";
+        return;
+      }
+      
+      showStatus(`Welcome, ${userData.username}! Your profile is loaded.`, 'success', 3500);
+
+      // 3. แสดงข้อมูล Profile
+      accountUsername.textContent = userData.username || 'N/A';
+      accountEmail.textContent = userData.email || 'N/A';
+
+      // 4. สร้าง "vehicles" array จากข้อมูลที่ได้ตอน Login/Signup
+      // (Script เดิมของคุณมองหา 'vehicles' array แต่ login/signup ของเราเก็บเป็น top-level)
+      const vehicles = [];
+      if (userData.license_plate) {
+          vehicles.push({
+              licensePlate: userData.license_plate,
+              type: userData.car_type,
+              brand: userData.car_brand,
+              model: userData.car_model,
+              color: userData.car_color
+          });
+      }
+      
+      // (ส่วนนี้ดึงจาก 'vehicles' array หากผู้ใช้กด "Add Vehicle" ในหน้านี้)
+      if (Array.isArray(userData.vehicles)) {
+          vehicles.push(...userData.vehicles);
       }
 
-      if (!isLoggedIn) {
-        showStatus('Please log in to manage your profile.', 'info', 0);
-      } else if (!userData || Object.keys(userData).length === 0) {
-        showStatus('Complete signup to personalize your profile.', 'info', 0);
-      }
-
-      const vehicles = Array.isArray(userData.vehicles) ? [...userData.vehicles] : [];
-
-      accountUsername.textContent = userData.username || 'Guest';
-      let email = userData.email || localStorage.getItem('userEmail') || '';
-      if (!email) {
-        email = 'guest@example.com';
-      }
-      accountEmail.textContent = email;
-      if (!userData.email && email !== 'guest@example.com') {
-        userData.email = email;
-      }
-
-      if (userData.createdAt) {
-        const createdDate = new Date(userData.createdAt);
-        if (!Number.isNaN(createdDate.valueOf())) {
-          accountCreated.textContent = 'Member since ' + createdDate.toLocaleDateString();
-        }
-      }
-
-      function updateVehicleCount() {
-        if (!accountVehicleCount) return;
-        accountVehicleCount.textContent = vehicles.length + ' vehicle' + (vehicles.length === 1 ? '' : 's') + ' stored';
-      }
-
+      // 5. แสดงผล Vehicle
       function renderVehicles() {
         if (!vehicleList) return;
-        vehicleList.innerHTML = '';
+        vehicleList.innerHTML = ''; // เคลียร์ของเก่า
 
-        if (!vehicles.length) {
-          if (vehicleEmptyState) {
-            vehicleEmptyState.classList.remove('hidden');
-          }
-          updateVehicleCount();
+        if (vehicles.length === 0) {
+          vehicleEmptyState.classList.remove('hidden');
+          accountVehicleCount.textContent = '0 vehicles stored';
           return;
         }
 
-        if (vehicleEmptyState) {
-          vehicleEmptyState.classList.add('hidden');
-        }
+        vehicleEmptyState.classList.add('hidden');
+        accountVehicleCount.textContent = `${vehicles.length} vehicle${vehicles.length > 1 ? 's' : ''} stored`;
 
         vehicles.forEach((vehicle) => {
           const item = document.createElement('div');
           item.className = 'vehicle-item';
-
-          const header = document.createElement('div');
-          header.className = 'vehicle-header';
-
-          const plate = document.createElement('span');
-          plate.className = 'vehicle-plate';
-          plate.textContent = vehicle.licensePlate || 'N/A';
-
-          const type = document.createElement('span');
-          type.className = 'vehicle-type';
-          type.textContent = vehicle.type || 'Vehicle';
-
-          header.appendChild(plate);
-          header.appendChild(type);
-
-          const meta = document.createElement('div');
-          meta.className = 'vehicle-meta';
-
-          const brandSpan = document.createElement('span');
-          const brandLabel = document.createElement('strong');
-          brandLabel.textContent = 'Brand:';
-          brandSpan.appendChild(brandLabel);
-          brandSpan.appendChild(document.createTextNode(' ' + (vehicle.brand || 'N/A')));
-
-          const modelSpan = document.createElement('span');
-          const modelLabel = document.createElement('strong');
-          modelLabel.textContent = 'Model:';
-          modelSpan.appendChild(modelLabel);
-          modelSpan.appendChild(document.createTextNode(' ' + (vehicle.model || 'N/A')));
-
-          const colorSpan = document.createElement('span');
-          const colorLabel = document.createElement('strong');
-          colorLabel.textContent = 'Color:';
-          colorSpan.appendChild(colorLabel);
-          colorSpan.appendChild(document.createTextNode(' ' + (vehicle.color || 'N/A')));
-
-          meta.appendChild(brandSpan);
-          meta.appendChild(modelSpan);
-          meta.appendChild(colorSpan);
-
-          item.appendChild(header);
-          item.appendChild(meta);
-
+          
+          item.innerHTML = `
+            <div class="vehicle-header">
+              <span class="vehicle-plate">${vehicle.licensePlate || 'N/A'}</span>
+              <span class="vehicle-type">${vehicle.type || 'Vehicle'}</span>
+            </div>
+            <div class="vehicle-meta">
+              <span><strong>Brand:</strong> ${vehicle.brand || 'N/A'}</span>
+              <span><strong>Model:</strong> ${vehicle.model || 'N/A'}</span>
+              <span><strong>Color:</strong> ${vehicle.color || 'N/A'}</span>
+            </div>
+          `;
           vehicleList.appendChild(item);
         });
-
-        updateVehicleCount();
       }
+
+      // 6. (ส่วนฟอร์ม "Add a New Vehicle" - ยังคงทำงานเหมือนเดิม)
+      const addCarForm = document.getElementById('addCarForm');
+      addCarForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const newVehicle = {
+              licensePlate: document.getElementById('newLicensePlate').value.trim().toUpperCase(),
+              type: document.getElementById('newCarType').value,
+              brand: document.getElementById('newCarBrand').value.trim(),
+              model: document.getElementById('newCarModel').value.trim(),
+              color: document.getElementById('newCarColor').value.trim(),
+          };
+          
+          if (!newVehicle.licensePlate || !newVehicle.type) {
+              showStatus('Please fill in at least License Plate and Car Type.', 'info');
+              return;
+          }
+          
+          // (บันทึกลง localStorage 'userData.vehicles' array)
+          if (!Array.isArray(userData.vehicles)) {
+              userData.vehicles = [];
+          }
+          userData.vehicles.push(newVehicle);
+          vehicles.push(newVehicle); // อัปเดต array ที่ใช้แสดงผล
+          
+          localStorage.setItem('userData', JSON.stringify(userData));
+          renderVehicles();
+          addCarForm.reset();
+          showStatus('Vehicle added locally.', 'success');
+      });
 
       function showStatus(message, type = 'success', timeout = 3500) {
         if (!statusBanner) return;
@@ -235,41 +236,13 @@
         }
       }
 
+      // 7. แสดงผลทั้งหมด
       renderVehicles();
-      updateVehicleCount();
-
-      if (addCarForm) {
-        addCarForm.addEventListener('submit', (event) => {
-          event.preventDefault();
-
-          const newVehicle = {
-            licensePlate: (newLicensePlateInput?.value || '').trim().toUpperCase(),
-            type: newCarTypeInput?.value || '',
-            brand: (newCarBrandInput?.value || '').trim(),
-            model: (newCarModelInput?.value || '').trim(),
-            color: (newCarColorInput?.value || '').trim(),
-          };
-
-          if (!newVehicle.licensePlate || !newVehicle.type || !newVehicle.brand || !newVehicle.model || !newVehicle.color) {
-            showStatus('Please fill in all required fields.', 'info');
-            return;
-          }
-
-          vehicles.push(newVehicle);
-          userData.vehicles = vehicles;
-
-          try {
-            localStorage.setItem('userData', JSON.stringify(userData));
-            renderVehicles();
-            addCarForm.reset();
-            showStatus('Vehicle added successfully.');
-          } catch (error) {
-            console.error('Unable to save vehicle:', error);
-            showStatus('Could not save vehicle. Please try again.', 'info');
-          }
-        });
+      
+      // (เรียก initializeAuthUI จาก script.js เพื่ออัปเดต Profile icon บน Header)
+      if (typeof initializeAuthUI === 'function') {
+        initializeAuthUI();
       }
-
     });
   </script>
 </body>

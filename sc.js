@@ -48,14 +48,14 @@ async function fetchParkingLotsInfo() {
     );
     const json = await response.json();
     
-    // ⭐ FIX: Extract 'data' array from the parsed body
-    const lots = JSON.parse(json.body).data; 
+    // API 1 returns { "data": [...] }
+    const lots = json.data; 
 
-    // 🧠 FIX: Data is Normal JSON (from DocumentClient), no .S or .N needed
+    // 🧠 FIX: Data is DynamoDB JSON, must read .S and .N
     lots.forEach(item => {
-      const lotId = item.lot_id;
-      const total = Number(item.total_slots);
-      const available = Number(item.available_slots);
+      const lotId = item.lot_id.S;
+      const total = Number(item.total_slots.N);
+      const available = Number(item.available_slots.N);
 
       const loc = customLocations.find(loc => loc.lot_id === lotId);
       if (loc) {
@@ -79,9 +79,9 @@ async function fetchParkingData() {
     );
     const json = await response.json();
     
-    // ⭐⭐ FIX: Extract 'data' array from the parsed body
+    // ⭐⭐ FIX: API 2 returns { "body": "[...]" } (Proxy)
     // This is line 85
-    const slots = JSON.parse(json.body).data; 
+    const slots = JSON.parse(json.body); 
 
     // reset available
     customLocations.forEach(loc => loc.available = 0);
