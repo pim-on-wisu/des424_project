@@ -633,7 +633,7 @@
   <script>
     // ✅ 1. ย้าย Global variables มาไว้บนสุด
     const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
-    let allBookings = []; // ❗ เราจะเติมข้อมูลนี้จาก API
+    let allBookings = [];
     let currentFilter = 'all';
     let deleteBookingId = null;
 
@@ -650,31 +650,30 @@
       // (ถ้าเป็น Admin จริง ให้โหลดข้อมูล)
       const userData = JSON.parse(sessionStorage.getItem("userData"));
       document.getElementById("adminName").textContent = userData.username || "Administrator";
-      document.getElementById("adminEmail").textContent = userData.email || "admin@system.com";
+      // document.getElementById("adminEmail").textContent = userData.email || "admin@system.com";
 
-      // ❗ โหลดข้อมูลจริงจาก Backend
+      // ✅ 3. โหลดข้อมูลจริงจาก Backend
       loadAdminData();
     }
 
     // --- 4. [ฟังก์ชันใหม่] โหลดข้อมูลจาก API ---
     async function loadAdminData() {
       try {
-        const response = await fetch(`${API_ENDPOINT}/admindata`);
+        const response = await fetch(`${API_ENDPOINT}/admindata`); // (เรียก API ที่เราสร้างไว้)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
 
-        // ❗ นำข้อมูลที่ได้จาก API มาใส่ในตัวแปร
         allBookings = data.bookings || [];
 
-        // ❗ อัปเดต Stats
+        // อัปเดต Stats
         document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
         document.getElementById('activeBookings').textContent = data.stats.activeBookings || 0;
         document.getElementById('totalBookings').textContent = data.stats.totalBookings || 0;
         document.getElementById('totalRevenue').textContent = `฿${data.stats.totalRevenue || 0}`;
 
-        // ❗ โหลดตาราง
+        // โหลดตาราง
         loadBookings();
 
       } catch (error) {
@@ -685,32 +684,20 @@
     }
 
 
-    // --- 4. [ฟังก์ชันแก้ไข] loadBookings (ให้รองรับข้อมูลจริง) ---
-    // (ฟังก์ชันนี้เหมือนเดิม แต่ตอนนี้จะใช้ "allBookings" ที่มาจาก API)
+    // --- 5. [ฟังก์ชันแก้ไข] loadBookings (เพิ่ม Logic ซ่อนปุ่ม) ---
     function loadBookings() {
-      // (เพิ่ม Mapping ชื่อลานจอด)
-      const lotNames = {
-        "siit_a1": "SIIT Parking A1",
-        "siit_a2": "SIIT Parking A2",
-        "siit_bkd": "SIIT BKD",
-      };
+      const lotNames = { "siit_a1": "SIIT Parking A1", "siit_a2": "SIIT Parking A2", "siit_bkd": "SIIT BKD" };
 
       const filteredBookings = currentFilter === 'all'
         ? allBookings
         : allBookings.filter(b => b.status === currentFilter);
 
-      // (เรียงข้อมูลจากใหม่ไปเก่า)
       filteredBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
 
       const tableContainer = document.getElementById('bookingsTable');
 
       if (filteredBookings.length === 0) {
-        tableContainer.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📋</div>
-            <div class="empty-text">No bookings found</div>
-          </div>
-        `;
+        tableContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No bookings found</div></div>`;
         return;
       }
 
@@ -735,9 +722,7 @@
                 <td>
                   <div class="user-cell">
                     <div class="user-avatar">${booking.user_id.charAt(0).toUpperCase()}</div>
-                    <div class="user-info">
-                      <div class="user-name">${booking.user_id}</div>
-                    </div>
+                    <div class="user-info"><div class="user-name">${booking.user_id}</div></div>
                   </div>
                 </td>
                 <td>${lotNames[booking.lot_id] || booking.lot_id}</td>
@@ -750,7 +735,9 @@
                 <td><span class="status-badge ${booking.status}">${booking.status}</span></td>
                 <td>
                   <div class="action-btns">
-                    <button class="action-btn delete" onclick="openDeleteModal('${booking.reservation_id}', '${booking.user_id}')">Delete</button>
+                    ${booking.status === 'active' ? `
+                      <button class="action-btn delete" onclick="openDeleteModal('${booking.reservation_id}', '${booking.user_id}')">Cancel</button>
+                    ` : ''}
                   </div>
                 </td>
               </tr>
@@ -758,17 +745,57 @@
           </tbody>
         </table>
       `;
-      // (ฟังก์ชัน updateStats() ถูกย้ายไปอยู่ใน loadAdminData() แล้ว)
     }
 
-    // --- 5. [ฟังก์ชันแก้ไข] logout (ให้ล้าง Key ที่ถูกต้อง) ---
+    // --- 6. [ฟังก์ชันแก้ไข] logout (แก้ให้ล้าง sessionStorage) ---
     function logout() {
       if (confirm('Are you sure you want to sign out?')) {
-        // ❗ ล้าง Key ที่ login.html บันทึกไว้
         sessionStorage.removeItem('loggedIn');
         sessionStorage.removeItem('username');
         sessionStorage.removeItem('userData');
         window.location.href = 'login.html';
+      }
+    }
+
+    // --- 7. [ฟังก์ชันแก้ไข] open/close Modal (เปลี่ยนข้อความ) ---
+    function openDeleteModal(bookingId, userId) {
+      deleteBookingId = bookingId;
+      document.querySelector('#deleteModal h3').textContent = "Cancel Booking?"; // ✅ เปลี่ยน Title
+      document.getElementById('deleteMessage').textContent =
+        `Are you sure you want to CANCEL booking #${bookingId.substring(0, 8)} for ${userId}? This will set the status to 'cancelled by admin'.`;
+      document.querySelector('#deleteModal .confirm').textContent = "Confirm Cancel"; // ✅ เปลี่ยนปุ่ม
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      deleteBookingId = null;
+    }
+
+    // --- 8. [ฟังก์ชันแก้ไข] confirmDelete (ให้ยิง API) ---
+    async function confirmDelete() {
+      if (!deleteBookingId) return;
+
+      try {
+        // ✅ [เป้าหมาย 1] ยิง API /cancelbooking
+        const response = await fetch(`${API_ENDPOINT}/cancelBookingAdmin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservation_id: deleteBookingId })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to cancel');
+        }
+
+        alert('Booking cancelled successfully!');
+        loadAdminData(); // ✅ [เป้าหมาย 1] โหลดข้อมูลใหม่ทั้งหมดจาก DB
+
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      } finally {
+        closeDeleteModal(); // ปิด Modal ไม่ว่าผลจะเป็นยังไง
       }
     }
 
@@ -782,46 +809,6 @@
       loadBookings();
     }
 
-    function openDeleteModal(bookingId, userId) {
-      deleteBookingId = bookingId;
-      document.getElementById('deleteMessage').textContent =
-        `Are you sure you want to delete booking #${bookingId.substring(0, 8)} for ${userId}? This action cannot be undone.`;
-      document.getElementById('deleteModal').classList.add('active');
-    }
-
-    function closeDeleteModal() {
-      document.getElementById('deleteModal').classList.remove('active');
-      deleteBookingId = null;
-    }
-
-    async function confirmDelete() {
-      if (!deleteBookingId) return;
-
-      // ❗ (คุณต้องสร้าง API /deletebooking ด้วย)
-      // try {
-      //   const response = await fetch(`${API_ENDPOINT}/deletebooking`, {
-      //       method: 'POST',
-      //       headers: { 'Content-Type': 'application/json' },
-      //       body: JSON.stringify({ reservation_id: deleteBookingId })
-      //   });
-      //   if (!response.ok) throw new Error('Failed to delete');
-      //   
-      //   alert('Booking deleted successfully!');
-      //   loadAdminData(); // โหลดข้อมูลใหม่ทั้งหมด
-      // } catch (error) {
-      //   alert(`Error: ${error.message}`);
-      // } finally {
-      //   closeDeleteModal();
-      // }
-
-      // (สำหรับตอนนี้ เราจะลบออกจาก Array ในหน้าเว็บไปก่อน)
-      allBookings = allBookings.filter(b => b.reservation_id !== deleteBookingId);
-      closeDeleteModal();
-      loadBookings(); // โหลดตารางใหม่
-      updateStats(); // อัปเดต Stats ใหม่
-    }
-
-    // (Helper functions)
     function formatDate(dateString) {
       if (!dateString) return 'N/A';
       const date = new Date(dateString);
@@ -834,7 +821,6 @@
       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
-    // (Search functionality - ยังไม่เชื่อมต่อ)
     document.getElementById('searchInput').addEventListener('input', (e) => {
       // (คุณต้องเพิ่ม Logic การ Search ที่นี่)
     });
