@@ -608,7 +608,7 @@
     }
 
     const total = pricePerHour * selectedHours;
-    const userId = sessionStorage.getItem("userId") || "guest";
+    const userId = sessionStorage.getItem("username") || "guest";
     const startTime = new Date().toISOString();
     const endTime = new Date(Date.now() + selectedHours * 60 * 60 * 1000).toISOString();
 
