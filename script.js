@@ -196,8 +196,8 @@ const bookingPageButton = document.getElementById("bookingPageButton");
 
 function initializeAuthUI() {
   // ⭐ FIX: ใช้ "loggedIn" (L ตัวเล็ก) ให้ตรงกับที่ login.html/signup.html บันทึกไว้
-  const isLoggedIn = localStorage.getItem("loggedIn") === "true";
-  const userDataRaw = localStorage.getItem("userData");
+  const isLoggedIn = sessionStorage.getItem("loggedIn") === "true";
+  const userDataRaw = sessionStorage.getItem("userData");
 
   let displayName = "Guest";
   let derivedEmail = "guest@example.com";
@@ -307,12 +307,12 @@ function goToMybooking() { window.location.href = '/my_booking.html'; } // ⭐ F
 
 function logout() {
   // ⭐ FIX: ใช้ 'loggedIn' (L ตัวเล็ก)
-  localStorage.removeItem("loggedIn");
-  localStorage.removeItem("username");
-  localStorage.removeItem("userData");
-  localStorage.removeItem("previousPage");
+  sessionStorage.removeItem("loggedIn");
+  sessionStorage.removeItem("username");
+  sessionStorage.removeItem("userData");
+  sessionStorage.removeItem("previousPage");
   closeProfileDropdown();
   initializeAuthUI(); // อัปเดต UI ทันที
-  //alert("You have been signed out successfully!");
+  alert("You have been signed out successfully!");
   window.location.reload(); 
 }

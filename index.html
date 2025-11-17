@@ -57,7 +57,7 @@
       // 1. ตั้งค่าปุ่ม Login
       if (loginBtn) {
         loginBtn.addEventListener('click', () => {
-          localStorage.setItem("previousPage", "index.html");
+          sessionStorage.setItem("previousPage", "index.html");
           window.location.href = 'login.html';
         });
       }
@@ -65,7 +65,7 @@
       // 2. ตั้งค่าปุ่ม Signup
       if (signupBtn) {
         signupBtn.addEventListener('click', () => {
-          localStorage.setItem("previousPage", "index.html");
+          sessionStorage.setItem("previousPage", "index.html");
           window.location.href = 'signup.html';
         });
       }

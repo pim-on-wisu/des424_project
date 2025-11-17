@@ -441,9 +441,9 @@
     };
 
     // ⭐ 1. Check Login Status
-    const username = localStorage.getItem("username"); 
+    const username = sessionStorage.getItem("username"); 
     if (!username) {
-        localStorage.setItem("previousPage", window.location.href);
+        sessionStorage.setItem("previousPage", window.location.href);
         window.location.href = "login.html";
     }
 

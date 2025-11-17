@@ -107,11 +107,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       
       // 1. ตรวจสอบสถานะล็อกอิน (เหมือนเดิม)
-      const isLoggedIn = localStorage.getItem("loggedIn") === "true";
-      const userDataRaw = localStorage.getItem("userData");
+      const isLoggedIn = sessionStorage.getItem("loggedIn") === "true";
+      const userDataRaw = sessionStorage.getItem("userData");
       
       if (!isLoggedIn || !userDataRaw) {
-          localStorage.setItem("previousPage", window.location.href);
+          sessionStorage.setItem("previousPage", window.location.href);
           window.location.href = "login.html";
           return;
       }
@@ -129,8 +129,8 @@
         userData = JSON.parse(userDataRaw);
       } catch (e) {
         console.error("Could not parse user data", e);
-        localStorage.removeItem("loggedIn");
-        localStorage.removeItem("userData");
+        sessionStorage.removeItem("loggedIn");
+        sessionStorage.removeItem("userData");
         window.location.href = "login.html";
         return;
       }
@@ -219,8 +219,8 @@
                 throw new Error(updatedUserData.message || "Failed to add vehicle");
             }
             
-            // ❗ [สำเร็จ] อัปเดต localStorage ด้วยข้อมูลใหม่ที่ได้จาก Lambda
-            localStorage.setItem('userData', JSON.stringify(updatedUserData));
+            // ❗ [สำเร็จ] อัปเดต sessionStorage ด้วยข้อมูลใหม่ที่ได้จาก Lambda
+            sessionStorage.setItem('userData', JSON.stringify(updatedUserData));
             userData = updatedUserData; // อัปเดตตัวแปร userData ที่ใช้ในหน้านี้
             
             renderVehicles(); // วาดหน้าใหม่

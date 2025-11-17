@@ -593,7 +593,7 @@
 
   // ✅ 5. ตรวจสอบการล็อกอิน
   function checkLoginStatus() {
-    const isLoggedIn = localStorage.getItem("loggedIn");
+    const isLoggedIn = sessionStorage.getItem("loggedIn");
     if (isLoggedIn === "true") {
         return true;
       }
@@ -608,7 +608,7 @@
     }
 
     const total = pricePerHour * selectedHours;
-    const userId = localStorage.getItem("userId") || "guest";
+    const userId = sessionStorage.getItem("userId") || "guest";
     const startTime = new Date().toISOString();
     const endTime = new Date(Date.now() + selectedHours * 60 * 60 * 1000).toISOString();
 

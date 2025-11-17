@@ -332,15 +332,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         
         if (res.ok) { // Status 200-299
             // ⭐ บันทึกสถานะและข้อมูลผู้ใช้เมื่อ Login สำเร็จ
-           localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("username", data.username); // <--- แก้ไข
-            localStorage.setItem("userData", JSON.stringify(data));
+            sessionStorage.setItem("loggedIn", "true");
+            sessionStorage.setItem("username", data.username); // <--- แก้ไข
+            sessionStorage.setItem("userData", JSON.stringify(data));
 
             //alert("✅ Login successful!");
             
             // ⭐ กลับไปหน้าเดิม (index.html หรือ booking.html)
-            const redirectUrl = localStorage.getItem("previousPage") || "index.html";
-            localStorage.removeItem("previousPage"); // ล้างค่าหน้าเดิม
+            const redirectUrl = sessionStorage.getItem("previousPage") || "index.html";
+            sessionStorage.removeItem("previousPage"); // ล้างค่าหน้าเดิม
             window.location.href = redirectUrl;
             
         } else { // Status 401, 404, 400
