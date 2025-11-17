@@ -32,10 +32,6 @@ let allMarkers = [];
 
 // ===== Static Locations (lat/lng + lot_id only) =====
 const customLocations = [
-  { keywords: ["ยิม 7", "gym"], name: "ยิม 7", lot_id: "gym7", lat: 14.06991063395858, lng: 100.60127691199303, available: 0, total: 0 },
-  { keywords: ["สกร", "sgr"], name: "สกร (SGR Building)", lot_id: "sgr", lat: 14.071526194306847, lng: 100.60373525365584, available: 0, total: 0 },
-  { keywords: ["uvillage"], name: "U Village", lot_id: "uvillage", lat: 14.06608047410596, lng: 100.60964327537296, available: 0, total: 0 },
-  { keywords: ["mingle"], name: "Mingle Café", lot_id: "mingle", lat: 14.06643051762887, lng: 100.61064864591621, available: 0, total: 0 },
   { keywords: ["siit", "a1"], name: "SIIT Parking A1", lot_id: "siit_a1", lat: 14.068225363631793, lng: 100.60776673076252, available: 0, total: 0 },
   { keywords: ["siit", "a2"], name: "SIIT Parking A2", lot_id: "siit_a2", lat: 14.068881627251303, lng: 100.60813318970119, available: 0, total: 0 },
   { keywords: ["bkd"], name: "SIIT BKD", lot_id: "siit_bkd", lat: 13.980709012610262, lng: 100.55455850149666, available: 0, total: 0 },
