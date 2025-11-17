@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,10 +121,21 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
 
-    .stat-card.primary { border-left-color: #3b82f6; }
-    .stat-card.success { border-left-color: #10b981; }
-    .stat-card.warning { border-left-color: #f59e0b; }
-    .stat-card.danger { border-left-color: #ef4444; }
+    .stat-card.primary {
+      border-left-color: #3b82f6;
+    }
+
+    .stat-card.success {
+      border-left-color: #10b981;
+    }
+
+    .stat-card.warning {
+      border-left-color: #f59e0b;
+    }
+
+    .stat-card.danger {
+      border-left-color: #ef4444;
+    }
 
     .stat-header {
       display: flex;
@@ -150,10 +162,21 @@
       font-size: 24px;
     }
 
-    .stat-card.primary .stat-icon { background: #dbeafe; }
-    .stat-card.success .stat-icon { background: #d1fae5; }
-    .stat-card.warning .stat-icon { background: #fef3c7; }
-    .stat-card.danger .stat-icon { background: #fee2e2; }
+    .stat-card.primary .stat-icon {
+      background: #dbeafe;
+    }
+
+    .stat-card.success .stat-icon {
+      background: #d1fae5;
+    }
+
+    .stat-card.warning .stat-icon {
+      background: #fef3c7;
+    }
+
+    .stat-card.danger .stat-icon {
+      background: #fee2e2;
+    }
 
     .stat-value {
       font-size: 36px;
@@ -323,9 +346,8 @@
       display: flex;
       gap: 4px;
       justify-content: center;
-      width: 130px; 
-      flex-wrap: wrap 
-      
+      width: 130px;
+      flex-wrap: wrap
     }
 
 
@@ -378,8 +400,13 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     .modal-content {
@@ -396,6 +423,7 @@
         opacity: 0;
         transform: scale(0.9);
       }
+
       to {
         opacity: 1;
         transform: scale(1);
@@ -478,7 +506,7 @@
       color: #6b7280;
     }
 
-    
+
 
     @media (max-width: 768px) {
       .container {
@@ -505,13 +533,14 @@
         display: flex;
         gap: 8px;
         justify-content: flex-end;
-        width: 130px; 
-        flex-wrap: wrap 
+        width: 130px;
+        flex-wrap: wrap
       }
 
     }
   </style>
 </head>
+
 <body>
   <header class="admin-header">
     <div class="header-left">
@@ -577,12 +606,7 @@
       <div class="card-header">
         <h2 class="card-title">All Bookings</h2>
         <div class="search-filter">
-          <input 
-            type="text" 
-            class="search-input" 
-            id="searchInput"
-            placeholder="Search by user or location..."
-          >
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by user or location...">
           <button class="filter-btn active" onclick="filterBookings('all')">All</button>
           <button class="filter-btn" onclick="filterBookings('active')">Active</button>
           <button class="filter-btn" onclick="filterBookings('completed')">Completed</button>
@@ -607,73 +631,76 @@
   </div>
 
   <script>
-    // Check admin authentication
-    if (localStorage.getItem("adminLoggedIn") !== "true") {
-      window.location.href = "login.html";
-    }
-
-    // Display admin email
-    document.getElementById("adminEmail").textContent = localStorage.getItem("adminEmail") || "admin@parkwithme.com";
-
-    // Sample booking data (in production, fetch from backend)
-    let allBookings = [
-      {
-        id: 1,
-        userName: "John Smith",
-        userEmail: "john@email.com",
-        location: "Downtown Parking Plaza",
-        space: "A12",
-        date: "2025-11-13",
-        time: "09:00 - 12:00",
-        duration: 3,
-        price: 150,
-        status: "active"
-      },
-      {
-        id: 2,
-        userName: "Sarah Johnson",
-        userEmail: "sarah@email.com",
-        location: "Central Mall Parking",
-        space: "B05",
-        date: "2025-11-13",
-        time: "14:00 - 18:00",
-        duration: 4,
-        price: 200,
-        status: "active"
-      },
-      {
-        id: 3,
-        userName: "Mike Brown",
-        userEmail: "mike@email.com",
-        location: "Riverside Parking",
-        space: "C21",
-        date: "2025-11-10",
-        time: "10:00 - 13:00",
-        duration: 3,
-        price: 150,
-        status: "completed"
-      },
-      {
-        id: 4,
-        userName: "Emily Davis",
-        userEmail: "emily@email.com",
-        location: "Downtown Parking Plaza",
-        space: "A08",
-        date: "2025-11-12",
-        time: "08:00 - 17:00",
-        duration: 9,
-        price: 450,
-        status: "completed"
-      }
-    ];
-
+    // ✅ 1. ย้าย Global variables มาไว้บนสุด
+    const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
+    let allBookings = []; // ❗ เราจะเติมข้อมูลนี้จาก API
     let currentFilter = 'all';
     let deleteBookingId = null;
 
+    // --- 2. ตรวจสอบสิทธิ์ Admin (โค้ดเดิม) ---
+    const isLoggedIn = sessionStorage.getItem("loggedIn") === "true";
+    const username = sessionStorage.getItem("username");
+
+    if (!isLoggedIn || username !== "admin") {
+      sessionStorage.removeItem("loggedIn");
+      sessionStorage.removeItem("username");
+      sessionStorage.removeItem("userData");
+      window.location.href = "login.html";
+    } else {
+      // (ถ้าเป็น Admin จริง ให้โหลดข้อมูล)
+      const userData = JSON.parse(sessionStorage.getItem("userData"));
+      document.getElementById("adminName").textContent = userData.username || "Administrator";
+      document.getElementById("adminEmail").textContent = userData.email || "admin@system.com";
+
+      // ❗ โหลดข้อมูลจริงจาก Backend
+      loadAdminData();
+    }
+
+    // --- 4. [ฟังก์ชันใหม่] โหลดข้อมูลจาก API ---
+    async function loadAdminData() {
+      try {
+        const response = await fetch(`${API_ENDPOINT}/admindata`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // ❗ นำข้อมูลที่ได้จาก API มาใส่ในตัวแปร
+        allBookings = data.bookings || [];
+
+        // ❗ อัปเดต Stats
+        document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
+        document.getElementById('activeBookings').textContent = data.stats.activeBookings || 0;
+        document.getElementById('totalBookings').textContent = data.stats.totalBookings || 0;
+        document.getElementById('totalRevenue').textContent = `฿${data.stats.totalRevenue || 0}`;
+
+        // ❗ โหลดตาราง
+        loadBookings();
+
+      } catch (error) {
+        console.error("Failed to load admin data:", error);
+        document.getElementById('bookingsTable').innerHTML =
+          `<div class="empty-state"><div class="empty-text">Error loading data: ${error.message}</div></div>`;
+      }
+    }
+
+
+    // --- 4. [ฟังก์ชันแก้ไข] loadBookings (ให้รองรับข้อมูลจริง) ---
+    // (ฟังก์ชันนี้เหมือนเดิม แต่ตอนนี้จะใช้ "allBookings" ที่มาจาก API)
     function loadBookings() {
-      const filteredBookings = currentFilter === 'all' 
-        ? allBookings 
+      // (เพิ่ม Mapping ชื่อลานจอด)
+      const lotNames = {
+        "siit_a1": "SIIT Parking A1",
+        "siit_a2": "SIIT Parking A2",
+        "siit_bkd": "SIIT BKD",
+      };
+
+      const filteredBookings = currentFilter === 'all'
+        ? allBookings
         : allBookings.filter(b => b.status === currentFilter);
+
+      // (เรียงข้อมูลจากใหม่ไปเก่า)
+      filteredBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
 
       const tableContainer = document.getElementById('bookingsTable');
 
@@ -704,28 +731,26 @@
           <tbody>
             ${filteredBookings.map(booking => `
               <tr>
-                <td>#${booking.id}</td>
+                <td>#${booking.reservation_id.substring(0, 8)}...</td>
                 <td>
                   <div class="user-cell">
-                    <div class="user-avatar">${booking.userName.charAt(0)}</div>
+                    <div class="user-avatar">${booking.user_id.charAt(0).toUpperCase()}</div>
                     <div class="user-info">
-                      <div class="user-name">${booking.userName}</div>
-                      <div class="user-email">${booking.userEmail}</div>
+                      <div class="user-name">${booking.user_id}</div>
                     </div>
                   </div>
                 </td>
-                <td>${booking.location}</td>
-                <td><strong>${booking.space}</strong></td>
+                <td>${lotNames[booking.lot_id] || booking.lot_id}</td>
+                <td><strong>${booking.slot_id}</strong></td>
                 <td>
-                  <div>${booking.date}</div>
-                  <div style="font-size: 12px; color: #6b7280;">${booking.time}</div>
+                  <div>${formatDate(booking.start_time)}</div>
+                  <div style="font-size: 12px; color: #6b7280;">${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}</div>
                 </td>
                 <td><strong>฿${booking.price}</strong></td>
                 <td><span class="status-badge ${booking.status}">${booking.status}</span></td>
                 <td>
                   <div class="action-btns">
-                    <button class="action-btn view" onclick="viewBooking(${booking.id})">View</button>
-                    <button class="action-btn delete" onclick="openDeleteModal(${booking.id})">Delete</button>
+                    <button class="action-btn delete" onclick="openDeleteModal('${booking.reservation_id}', '${booking.user_id}')">Delete</button>
                   </div>
                 </td>
               </tr>
@@ -733,38 +758,34 @@
           </tbody>
         </table>
       `;
-
-      updateStats();
+      // (ฟังก์ชัน updateStats() ถูกย้ายไปอยู่ใน loadAdminData() แล้ว)
     }
 
-    function updateStats() {
-      const uniqueUsers = new Set(allBookings.map(b => b.userEmail)).size;
-      const active = allBookings.filter(b => b.status === 'active').length;
-      const total = allBookings.length;
-      const revenue = allBookings.reduce((sum, b) => sum + b.price, 0);
-
-      document.getElementById('totalUsers').textContent = uniqueUsers;
-      document.getElementById('activeBookings').textContent = active;
-      document.getElementById('totalBookings').textContent = total;
-      document.getElementById('totalRevenue').textContent = `฿${revenue}`;
+    // --- 5. [ฟังก์ชันแก้ไข] logout (ให้ล้าง Key ที่ถูกต้อง) ---
+    function logout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        // ❗ ล้าง Key ที่ login.html บันทึกไว้
+        sessionStorage.removeItem('loggedIn');
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('userData');
+        window.location.href = 'login.html';
+      }
     }
 
+    // --- (ฟังก์ชันที่เหลือเหมือนเดิม) ---
     function filterBookings(filter) {
       currentFilter = filter;
-      
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
       });
       event.target.classList.add('active');
-
       loadBookings();
     }
 
-    function openDeleteModal(bookingId) {
+    function openDeleteModal(bookingId, userId) {
       deleteBookingId = bookingId;
-      const booking = allBookings.find(b => b.id === bookingId);
-      document.getElementById('deleteMessage').textContent = 
-        `Are you sure you want to delete booking #${bookingId} for ${booking.userName}? This action cannot be undone.`;
+      document.getElementById('deleteMessage').textContent =
+        `Are you sure you want to delete booking #${bookingId.substring(0, 8)} for ${userId}? This action cannot be undone.`;
       document.getElementById('deleteModal').classList.add('active');
     }
 
@@ -773,45 +794,52 @@
       deleteBookingId = null;
     }
 
-    function confirmDelete() {
-      if (deleteBookingId) {
-        allBookings = allBookings.filter(b => b.id !== deleteBookingId);
-        closeDeleteModal();
-        loadBookings();
-        
-        // Show success notification
-        alert('Booking deleted successfully!');
-      }
+    async function confirmDelete() {
+      if (!deleteBookingId) return;
+
+      // ❗ (คุณต้องสร้าง API /deletebooking ด้วย)
+      // try {
+      //   const response = await fetch(`${API_ENDPOINT}/deletebooking`, {
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/json' },
+      //       body: JSON.stringify({ reservation_id: deleteBookingId })
+      //   });
+      //   if (!response.ok) throw new Error('Failed to delete');
+      //   
+      //   alert('Booking deleted successfully!');
+      //   loadAdminData(); // โหลดข้อมูลใหม่ทั้งหมด
+      // } catch (error) {
+      //   alert(`Error: ${error.message}`);
+      // } finally {
+      //   closeDeleteModal();
+      // }
+
+      // (สำหรับตอนนี้ เราจะลบออกจาก Array ในหน้าเว็บไปก่อน)
+      allBookings = allBookings.filter(b => b.reservation_id !== deleteBookingId);
+      closeDeleteModal();
+      loadBookings(); // โหลดตารางใหม่
+      updateStats(); // อัปเดต Stats ใหม่
     }
 
-    function viewBooking(bookingId) {
-      const booking = allBookings.find(b => b.id === bookingId);
-      alert(`Booking Details:\n\nID: #${booking.id}\nUser: ${booking.userName}\nLocation: ${booking.location}\nSpace: ${booking.space}\nDate: ${booking.date}\nTime: ${booking.time}\nPrice: ฿${booking.price}\nStatus: ${booking.status}`);
+    // (Helper functions)
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    function logout() {
-      if (confirm('Are you sure you want to sign out?')) {
-        localStorage.removeItem('adminLoggedIn');
-        localStorage.removeItem('adminEmail');
-        window.location.href = 'login.html';
-      }
+    function formatTime(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
-    // Search functionality
+    // (Search functionality - ยังไม่เชื่อมต่อ)
     document.getElementById('searchInput').addEventListener('input', (e) => {
-      const searchTerm = e.target.value.toLowerCase();
-      const filteredBookings = allBookings.filter(booking => 
-        booking.userName.toLowerCase().includes(searchTerm) ||
-        booking.userEmail.toLowerCase().includes(searchTerm) ||
-        booking.location.toLowerCase().includes(searchTerm)
-      );
-      
-      // Update table with filtered results
-      // Implementation would go here
+      // (คุณต้องเพิ่ม Logic การ Search ที่นี่)
     });
 
-    // Initial load
-    loadBookings();
   </script>
 </body>
+
 </html>

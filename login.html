@@ -320,40 +320,48 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
 
-    try {
-        // ⭐ เรียก API Gateway POST /login
-        const res = await fetch(`${API_ENDPOINT}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-        });
+   try {
+    // ⭐ เรียก API Gateway POST /login
+    const res = await fetch(`${API_ENDPOINT}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+    });
 
-        const data = await res.json();
-        
-        if (res.ok) { // Status 200-299
-            // ⭐ บันทึกสถานะและข้อมูลผู้ใช้เมื่อ Login สำเร็จ
-            sessionStorage.setItem("loggedIn", "true");
-            sessionStorage.setItem("username", data.username); // <--- แก้ไข
-            sessionStorage.setItem("userData", JSON.stringify(data));
+    // ✅ 1. ดึง data ออกมาตรงนี้
+    const data = await res.json(); 
 
-            //alert("✅ Login successful!");
-            
-            // ⭐ กลับไปหน้าเดิม (index.html หรือ booking.html)
-            const redirectUrl = sessionStorage.getItem("previousPage") || "index.html";
-            sessionStorage.removeItem("previousPage"); // ล้างค่าหน้าเดิม
-            window.location.href = redirectUrl;
-            
-        } else { // Status 401, 404, 400
-            alert('❌ Login failed: ' + (data.message || data.error));
-            loginBtn.classList.remove('loading');
-            loginBtn.disabled = false;
-        }
-    } catch (error) {
-        console.error("Login API Error:", error);
+  if (res.ok) { 
+    // 2. (ไม่ต้องประกาศ data ซ้ำ)
+    sessionStorage.setItem("loggedIn", "true");
+
+    // ✅ [เพิ่มบรรทัดที่ 1] บันทึก username สำหรับทุก role
+    sessionStorage.setItem("username", data.username); 
+
+    // ✅ [เพิ่มบรรทัดที่ 2] บันทึก userData สำหรับทุก role
+    sessionStorage.setItem("userData", JSON.stringify(data)); 
+
+    if (data.role === "admin") {
+        window.location.href = "admin_edit.html";
+    } else {
+        const redirectUrl = sessionStorage.getItem("previousPage") || "index.html";
+        sessionStorage.removeItem("previousPage"); 
+        window.location.href = redirectUrl;
+    }
+
+} else { 
+// ...
+        // ✅ 3. ตอนนี้ 'data' จะถูกมองเห็นใน else แล้ว
+        alert('❌ Login failed: ' + (data.message || data.error));
         loginBtn.classList.remove('loading');
         loginBtn.disabled = false;
-        alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับระบบ');
     }
+} catch (error) {
+    console.error("Login API Error:", error);
+    loginBtn.classList.remove('loading');
+    loginBtn.disabled = false;
+    alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับระบบ');
+}
 });
 
 </script>

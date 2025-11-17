@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -119,9 +120,17 @@
       border-radius: 4px;
     }
 
-    .legend-box.available { background: #10b981; }
-    .legend-box.occupied { background: #ef4444; }
-    .legend-box.selected { background: #3b82f6; }
+    .legend-box.available {
+      background: #10b981;
+    }
+
+    .legend-box.occupied {
+      background: #ef4444;
+    }
+
+    .legend-box.selected {
+      background: #3b82f6;
+    }
 
     /* Parking Layout */
     .parking-lot {
@@ -133,8 +142,8 @@
     }
 
     .parking-lot-message {
-      color: #6b7280; 
-      text-align: center; 
+      color: #6b7280;
+      text-align: center;
       grid-column: 1 / -1;
       padding: 20px;
       background: #f9fafb;
@@ -212,6 +221,7 @@
         opacity: 0;
         transform: translateY(-10px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -349,8 +359,13 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     .modal-content {
@@ -368,6 +383,7 @@
         opacity: 0;
         transform: scale(0.9);
       }
+
       to {
         opacity: 1;
         transform: scale(1);
@@ -425,6 +441,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -462,27 +479,27 @@
           <span class="detail-label">Selected Space:</span>
           <span class="detail-value" id="selectedSpace">-</span>
         </div>
-        
-<div class="time-selector">
-  <label>Start Time:</label>
-  <input type="datetime-local" id="startTime" class="time-input">
 
-  <label style="margin-top:12px;">Duration:</label>
-  <div class="time-buttons">
-    <button class="time-btn" data-hours="1">1 hr</button>
-    <button class="time-btn" data-hours="2">2 hrs</button>
-    <button class="time-btn" data-hours="3">3 hrs</button>
-    <button class="time-btn" data-hours="4">4 hrs</button>
-    <button class="time-btn" data-hours="6">6 hrs</button>
-    <button class="time-btn" data-hours="12">12 hrs</button>
-  </div>
-</div>
+        <div class="time-selector">
+          <label>Start Time:</label>
+          <input type="datetime-local" id="startTime" class="time-input">
 
-<div class="price-display" id="priceDisplay" style="display: none;">
-  <div class="price-label">Total Price</div>
-  <div class="price-amount" id="priceAmount">$0</div>
-  <div id="timeSummary" style="margin-top:10px;font-size:14px;color:#fff;"></div>
-</div>
+          <label style="margin-top:12px;">Duration:</label>
+          <div class="time-buttons">
+            <button class="time-btn" data-hours="1">1 hr</button>
+            <button class="time-btn" data-hours="2">2 hrs</button>
+            <button class="time-btn" data-hours="3">3 hrs</button>
+            <button class="time-btn" data-hours="4">4 hrs</button>
+            <button class="time-btn" data-hours="6">6 hrs</button>
+            <button class="time-btn" data-hours="12">12 hrs</button>
+          </div>
+        </div>
+
+        <div class="price-display" id="priceDisplay" style="display: none;">
+          <div class="price-label">Total Price</div>
+          <div class="price-amount" id="priceAmount">$0</div>
+          <div id="timeSummary" style="margin-top:10px;font-size:14px;color:#fff;"></div>
+        </div>
       </div>
 
       <button id="confirmBtn" class="confirm-btn" disabled>Confirm Booking</button>
@@ -499,160 +516,161 @@
   </div>
 
   <script>
-  // ✅ 1. Mapping ชื่อลาน -> lot_id
-  const lotMapping = {
-    "SIIT Parking A1": "siit_a1",
-    "SIIT Parking A2": "siit_a2",
-    "SIIT BKD": "siit_bkd",
-  };
+    // ✅ 1. Mapping ชื่อลาน -> lot_id
+    const lotMapping = {
+      "SIIT Parking A1": "siit_a1",
+      "SIIT Parking A2": "siit_a2",
+      "SIIT BKD": "siit_bkd",
+    };
 
-  const params = new URLSearchParams(window.location.search);
-  const place = decodeURIComponent(params.get("place") || "SIIT Parking A1");
-  const lot_id = lotMapping[place] || "siit_a1"; // default = A1
-  document.getElementById("placeName").textContent = place;
+    const params = new URLSearchParams(window.location.search);
+    const place = decodeURIComponent(params.get("place") || "SIIT Parking A1");
+    const lot_id = lotMapping[place] || "siit_a1"; // default = A1
+    document.getElementById("placeName").textContent = place;
 
-  const parkingLot = document.getElementById("parkingLot");
-  const confirmBtn = document.getElementById("confirmBtn");
-  const bookingDetails = document.getElementById("bookingDetails");
-  const priceDisplay = document.getElementById("priceDisplay");
-  const priceAmount = document.getElementById("priceAmount");
+    const parkingLot = document.getElementById("parkingLot");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const bookingDetails = document.getElementById("bookingDetails");
+    const priceDisplay = document.getElementById("priceDisplay");
+    const priceAmount = document.getElementById("priceAmount");
 
-  let selectedSlot = null;
-  let selectedHours = null;
-  const pricePerHour = 20;
+    let selectedSlot = null;
+    let selectedHours = null;
+    const pricePerHour = 20;
 
-  // ✅ 2. โหลดข้อมูลช่องจอดจริงจาก AWS
-  async function loadParkingSlots() {
-    try {
-      const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus");
-      const result = await response.json();
-      // const data = typeof result.body === "string" ? JSON.parse(result.body) : result;
-      const data = result; // (เพราะ result คือ object ที่ parse แล้ว)
+    // ✅ 2. โหลดข้อมูลช่องจอดจริงจาก AWS
+    async function loadParkingSlots() {
+      try {
+        const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus");
+        const result = await response.json();
+        // const data = typeof result.body === "string" ? JSON.parse(result.body) : result;
+        const data = result; // (เพราะ result คือ object ที่ parse แล้ว)
 
-      // ✅ filter เฉพาะ lot ที่เลือก (เช่น siit_a1)
-      const filtered = data.filter(slot => slot.lot_id === lot_id);
+        // ✅ filter เฉพาะ lot ที่เลือก (เช่น siit_a1)
+        const filtered = data.filter(slot => slot.lot_id === lot_id);
 
-      parkingLot.innerHTML = "";
+        parkingLot.innerHTML = "";
 
-      filtered.forEach(space => {
-        const isOccupied = space.status !== "free";
-        const div = document.createElement("div");
-        div.className = `parking-space ${isOccupied ? 'occupied' : 'available'}`;
-        div.innerHTML = `
+        filtered.forEach(space => {
+          const isOccupied = space.status !== "free";
+          const div = document.createElement("div");
+          div.className = `parking-space ${isOccupied ? 'occupied' : 'available'}`;
+          div.innerHTML = `
           <div class="space-number">${space.slot_id.replace(lot_id + "_", "A").toUpperCase()}</div>
           <div class="space-icon">${isOccupied ? '🚗' : '📍'}</div>
         `;
 
-        if (!isOccupied) {
-          div.addEventListener("click", () => selectSpace(space.slot_id, div));
-        }
+          if (!isOccupied) {
+            div.addEventListener("click", () => selectSpace(space.slot_id, div));
+          }
 
-        parkingLot.appendChild(div);
-      });
+          parkingLot.appendChild(div);
+        });
 
-    } catch (error) {
-      console.error("Error loading parking data:", error);
-      alert("❌ ไม่สามารถโหลดข้อมูลที่จอดได้ โปรดลองใหม่อีกครั้ง");
+      } catch (error) {
+        console.error("Error loading parking data:", error);
+        alert("❌ ไม่สามารถโหลดข้อมูลที่จอดได้ โปรดลองใหม่อีกครั้ง");
+      }
     }
-  }
 
-  window.addEventListener("DOMContentLoaded", loadParkingSlots);
+    window.addEventListener("DOMContentLoaded", loadParkingSlots);
 
-  // ✅ 3. เมื่อผู้ใช้เลือกที่จอด
-  function selectSpace(spaceId, element) {
-    document.querySelectorAll(".parking-space").forEach(s => s.classList.remove("selected"));
-    element.classList.add("selected");
-    selectedSlot = spaceId;
-    document.getElementById("selectedSpace").textContent = spaceId;
-    bookingDetails.classList.add("active");
-    updateConfirmButton();
-  }
-
-  // ✅ 4. เลือกเวลาและคำนวณราคา
-  document.querySelectorAll(".time-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedHours = parseInt(btn.dataset.hours);
-      updatePrice();
+    // ✅ 3. เมื่อผู้ใช้เลือกที่จอด
+    function selectSpace(spaceId, element) {
+      document.querySelectorAll(".parking-space").forEach(s => s.classList.remove("selected"));
+      element.classList.add("selected");
+      selectedSlot = spaceId;
+      document.getElementById("selectedSpace").textContent = spaceId;
+      bookingDetails.classList.add("active");
       updateConfirmButton();
-    });
-  });
-
-  function updatePrice() {
-    if (selectedHours) {
-      const total = pricePerHour * selectedHours;
-      priceAmount.textContent = `${total}฿`;
-      priceDisplay.style.display = "block";
     }
-  }
 
-  function updateConfirmButton() {
-    confirmBtn.disabled = !(selectedSlot && selectedHours);
-  }
+    // ✅ 4. เลือกเวลาและคำนวณราคา
+    document.querySelectorAll(".time-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedHours = parseInt(btn.dataset.hours);
+        updatePrice();
+        updateConfirmButton();
+      });
+    });
 
-  // ✅ 5. ตรวจสอบการล็อกอิน
-  function checkLoginStatus() {
-    const isLoggedIn = sessionStorage.getItem("loggedIn");
-    if (isLoggedIn === "true") {
+    function updatePrice() {
+      if (selectedHours) {
+        const total = pricePerHour * selectedHours;
+        priceAmount.textContent = `${total}฿`;
+        priceDisplay.style.display = "block";
+      }
+    }
+
+    function updateConfirmButton() {
+      confirmBtn.disabled = !(selectedSlot && selectedHours);
+    }
+
+    // ✅ 5. ตรวจสอบการล็อกอิน
+    function checkLoginStatus() {
+      const isLoggedIn = sessionStorage.getItem("loggedIn");
+      if (isLoggedIn === "true") {
         return true;
       }
       return false;
-  }
-
-  // ✅ 6. ฟังก์ชันจองที่จอด (ส่งไป Lambda)
-  confirmBtn.addEventListener("click", async () => {
-    if (!checkLoginStatus()) {
-      window.location.href = "login.html";
-      return;
     }
 
-    const total = pricePerHour * selectedHours;
-    const userId = sessionStorage.getItem("username") || "guest";
-    const startTime = new Date().toISOString();
-    const endTime = new Date(Date.now() + selectedHours * 60 * 60 * 1000).toISOString();
-
-    const bookingData = {
-      slot_id: selectedSlot,
-      user_id: userId,
-      start_time: startTime,
-      end_time: endTime,
-    };
-
-    try {
-      const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/bookParking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
-      });
-
-      const result = await response.json();
-      console.log("Booking API Response:", result);
-
-      if (response.ok) {
-        document.getElementById("confirmationMessage").textContent =
-          `Space ${selectedSlot} booked successfully for ${selectedHours} hour${selectedHours > 1 ? 's' : ''} at ${place}. Total: ${total}฿`;
-        document.getElementById("successModal").classList.add("active");
-      } else {
-        alert("เกิดข้อผิดพลาดในการจอง: " + (result.message || "Unknown error"));
+    // ✅ 6. ฟังก์ชันจองที่จอด (ส่งไป Lambda)
+    confirmBtn.addEventListener("click", async () => {
+      if (!checkLoginStatus()) {
+        window.location.href = "login.html";
+        return;
       }
-    } catch (error) {
-      console.error("Booking error:", error);
-      alert("ไม่สามารถเชื่อมต่อกับระบบจองได้ โปรดลองใหม่อีกครั้ง");
+
+      const total = pricePerHour * selectedHours;
+      const userId = sessionStorage.getItem("username") || "guest";
+      const startTime = new Date().toISOString();
+      const endTime = new Date(Date.now() + selectedHours * 60 * 60 * 1000).toISOString();
+
+      const bookingData = {
+        slot_id: selectedSlot,
+        user_id: userId,
+        start_time: startTime,
+        end_time: endTime,
+      };
+
+      try {
+        const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/bookParking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingData),
+        });
+
+        const result = await response.json();
+        console.log("Booking API Response:", result);
+
+        if (response.ok) {
+          document.getElementById("confirmationMessage").textContent =
+            `Space ${selectedSlot} booked successfully for ${selectedHours} hour${selectedHours > 1 ? 's' : ''} at ${place}. Total: ${total}฿`;
+          document.getElementById("successModal").classList.add("active");
+        } else {
+          alert("เกิดข้อผิดพลาดในการจอง: " + (result.message || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("Booking error:", error);
+        alert("ไม่สามารถเชื่อมต่อกับระบบจองได้ โปรดลองใหม่อีกครั้ง");
+      }
+    });
+
+    function closeModal() {
+      document.getElementById("successModal").classList.remove("active");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 300);
     }
-  });
 
-  function closeModal() {
-    document.getElementById("successModal").classList.remove("active");
-    setTimeout(() => {
+    function goBack() {
       window.location.href = "index.html";
-    }, 300);
-  }
-
-  function goBack() {
-    window.location.href = "index.html";
-  }
-</script>
+    }
+  </script>
 
 </body>
+
 </html>
