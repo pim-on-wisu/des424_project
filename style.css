@@ -245,8 +245,8 @@
     gap: 8px;
   }
 
-  .profile-dropdown {
-    width: min(260px, calc(100vw - 32px));
+ .profile-dropdown {
+    width: min(260px, calc(100vw - 48px));
   }
 
       .top-bar h1 {
