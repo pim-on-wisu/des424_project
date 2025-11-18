@@ -32,9 +32,9 @@ let allMarkers = [];
 
 // ===== Static Locations (lat/lng + lot_id only) =====
 const customLocations = [
-  { keywords: ["siit", "a1"], name: "SIIT Parking A1", lot_id: "siit_a1", lat: 14.068225363631793, lng: 100.60776673076252, available: 0, total: 0 },
-  { keywords: ["siit", "a2"], name: "SIIT Parking A2", lot_id: "siit_a2", lat: 14.068881627251303, lng: 100.60813318970119, available: 0, total: 0 },
-  { keywords: ["bkd"], name: "SIIT BKD", lot_id: "siit_bkd", lat: 13.980709012610262, lng: 100.55455850149666, available: 0, total: 0 },
+  { keywords: ["siit", "a1", "siit a1"], name: "SIIT Parking A1", lot_id: "siit_a1", lat: 14.068225363631793, lng: 100.60776673076252, available: 0, total: 0 },
+  { keywords: ["siit", "a2", "siit a2"], name: "SIIT Parking A2", lot_id: "siit_a2", lat: 14.068881627251303, lng: 100.60813318970119, available: 0, total: 0 },
+  { keywords: ["bkd", "บกด"], name: "SIIT BKD", lot_id: "siit_bkd", lat: 13.980709012610262, lng: 100.55455850149666, available: 0, total: 0 },
 ];
 
 // ===== Load Parking Lot Info (total + available from DynamoDB) =====
@@ -137,20 +137,37 @@ searchInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") handleSearch(searchInput.value.trim());
 });
 
- async function handleSearch(query) {
+async function handleSearch(query) {
   const clean = query.toLowerCase();
 
   allMarkers.forEach((m) => map.removeLayer(m));
   allMarkers = [];
 
   const found = customLocations.filter(loc =>
-    loc.keywords.some(key => clean.includes(key.toLowerCase()))
+    loc.keywords.some(key => key.toLowerCase().includes(clean))
   );
 
   if (found.length > 0) {
+
+    // --- 1. [เพิ่ม] สร้าง Array ว่างๆ เพื่อเก็บตำแหน่ง ---
+    const latLngs = [];
+
     found.forEach(loc => {
-      createBookingMarker(loc.lat, loc.lng, loc.name, loc.available, loc.total, loc.lot_id); // ⭐ FIX: Pass lot_id
+      createBookingMarker(loc.lat, loc.lng, loc.name, loc.available, loc.total, loc.lot_id);
+
+      // --- 2. [เพิ่ม] เพิ่มตำแหน่งของ Marker ที่เจอลงใน Array ---
+      latLngs.push([loc.lat, loc.lng]);
     });
+
+    // --- 3. [เพิ่ม] สั่งให้แผนที่เลื่อน ---
+    if (latLngs.length === 1) {
+      // ถ้าเจอ 1 ที่: ให้เลื่อนไปที่นั่นและซูมเข้า (เช่น zoom 17)
+      map.setView(latLngs[0], 17);
+    } else {
+      // ถ้าเจอหลายที่ (เช่น "siit"): ให้ปรับแผนที่ให้เห็นทุก Markers
+      map.fitBounds(latLngs, { padding: [50, 50] }); // (padding 50px กันขอบ)
+    }
+
   } else {
     alert("ไม่พบสถานที่");
   }

@@ -65,7 +65,7 @@
       // 2. ตั้งค่าปุ่ม Signup
       if (signupBtn) {
         signupBtn.addEventListener('click', () => {
-          sessionStorage.setItem("previousPage", "index.html");
+          sessionStorage.setItem("previousPage", "index.html"); // <--- FIX
           window.location.href = 'signup.html';
         });
       }

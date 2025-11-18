@@ -753,14 +753,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(loginData.message || loginData.error || "Auto-login failed");
             }
 
-            // 4. บันทึกสถานะลง localStorage
-            localStorage.setItem("loggedIn", "true");
-            localStorage.setItem("username", loginData.username); // <--- แก้ไข
-            localStorage.setItem("userData", JSON.stringify(loginData));
+            // 4. บันทึกสถานะลง sessionStorage
+            sessionStorage.setItem("loggedIn", "true");
+            sessionStorage.setItem("username", loginData.username); // <--- แก้ไข
+            sessionStorage.setItem("userData", JSON.stringify(loginData));
 
             // 5. กลับไปหน้าเดิม
-            const redirectUrl = localStorage.getItem("previousPage") || "index.html";
-            localStorage.removeItem("previousPage"); // ล้างค่า
+            const redirectUrl = sessionStorage.getItem("previousPage") || "index.html";
+            sessionStorage.removeItem("previousPage"); // ล้างค่า
             window.location.href = redirectUrl;
 
         } catch (error) {

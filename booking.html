@@ -448,7 +448,7 @@
       <button class="back-btn" onclick="goBack()">←</button>
       <div class="location-info">
         <h1 id="placeName">SIIT faculty Parking</h1>
-        <div class="location-subtitle">📍 Khlong Nueng, Khlong Luang District, Pathum Thani 12120</div>
+        <div class="location-subtitle" id="locationSubtitle">📍 Loading location...</div>
       </div>
       <div style="width:40px;"></div>
     </header>
@@ -541,17 +541,28 @@
     // ✅ 2. โหลดข้อมูลช่องจอดจริงจาก AWS
     async function loadParkingSlots() {
       try {
-        const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus");
-        const result = await response.json();
-        // const data = typeof result.body === "string" ? JSON.parse(result.body) : result;
-        const data = result; // (เพราะ result คือ object ที่ parse แล้ว)
+        // 1. ✅ ส่ง lot_id ไปใน URL (ตามที่ Lambda ในข้อ 2 ต้องการ)
+        const response = await fetch(`https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/getParkingStatus?lot_id=${lot_id}`);
+        const result = await response.json(); // (ตอนนี้ result คือ { slots: [...], details: {...} })
 
-        // ✅ filter เฉพาะ lot ที่เลือก (เช่น siit_a1)
-        const filtered = data.filter(slot => slot.lot_id === lot_id);
+        // 2. ✅ (ไม่ต้อง Parse body ซ้ำซ้อน)
+        const slots = result.slots || [];
+        const details = result.details || {};
+
+        // 3. ✅ (ไม่ต้อง .filter() อีก เพราะ Lambda กรองมาให้แล้ว)
+        // const filtered = data.filter(slot => slot.lot_id === lot_id); 
+
+        // 4. ✅ [เป้าหมาย] อัปเดต Subtitle ด้วยข้อมูลจาก DB
+        const subtitleEl = document.getElementById("locationSubtitle");
+        if (details.description) {
+          subtitleEl.textContent = details.description;
+        } else {
+          subtitleEl.textContent = "📍 Location details not found.";
+        }
 
         parkingLot.innerHTML = "";
 
-        filtered.forEach(space => {
+        slots.forEach(space => { // <--- แก้ไข 'filtered' เป็น 'slots'
           const isOccupied = space.status !== "free";
           const div = document.createElement("div");
           div.className = `parking-space ${isOccupied ? 'occupied' : 'available'}`;
