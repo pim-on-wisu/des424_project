@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -378,8 +379,13 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     .modal-content {
@@ -396,6 +402,7 @@
         opacity: 0;
         transform: scale(0.9);
       }
+
       to {
         opacity: 1;
         transform: scale(1);
@@ -484,11 +491,11 @@
       width: 100%;
       height: 8px;
       border-radius: 4px;
-      background: linear-gradient(to right, 
-        #667eea 0%, 
-        #667eea var(--slider-progress, 0%), 
-        #e5e7eb var(--slider-progress, 0%), 
-        #e5e7eb 100%);
+      background: linear-gradient(to right,
+          #667eea 0%,
+          #667eea var(--slider-progress, 0%),
+          #e5e7eb var(--slider-progress, 0%),
+          #e5e7eb 100%);
       outline: none;
       -webkit-appearance: none;
       appearance: none;
@@ -627,6 +634,7 @@
     }
   </style>
 </head>
+
 <body>
   <header class="top-bar">
     <button class="back-btn" onclick="goBack()">←</button>
@@ -666,29 +674,73 @@
       <!-- Loading state or empty state will be shown here -->
     </div>
 
-  <!-- Extend Time Modal -->
-  <div id="extendModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-icon">⏱️</div>
-        <h3>Extend Parking Time</h3>
-        <p class="modal-subtitle">Add more hours to your parking session</p>
-  </div>
+    <!-- Extend Time Modal -->
+    <div id="extendModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-icon">⏱️</div>
+          <h3>Extend Parking Time</h3>
+          <p class="modal-subtitle">Add more hours to your parking session</p>
+        </div>
 
-  <script>
-    // ⭐ API Endpoint (ชี้ไปที่ 0jcihmcez1)
+        <div class="extend-info">
+          <div class="extend-info-row">
+            <span class="extend-label">Location:</span>
+            <span class="extend-value" id="extendLocation">-</span>
+          </div>
+          <div class="extend-info-row">
+            <span class="extend-label">Space:</span>
+            <span class="extend-value" id="extendSpace">-</span>
+          </div>
+          <div class="extend-info-row">
+            <span class="extend-label">Current End Time:</span>
+            <span class="extend-value" id="extendCurrentEnd">-</span>
+          </div>
+        </div>
+
+        <div class="slider-container">
+          <div class="slider-header">
+            <span class="slider-label">Additional Hours</span>
+            <span class="slider-value" id="sliderValue">1 hr</span>
+          </div>
+          <input type="range" class="time-slider" id="timeSlider" min="1" max="12" value="1" step="1">
+          <div class="time-markers">
+            <span class="time-marker">1h</span>
+            <span class="time-marker">3h</span>
+            <span class="time-marker">6h</span>
+            <span class="time-marker">9h</span>
+            <span class="time-marker">12h</span>
+          </div>
+        </div>
+
+        <div class="price-preview">
+          <div class="price-preview-label">Additional Cost</div>
+          <div class="price-preview-amount" id="additionalPrice">฿50</div>
+          <div class="price-breakdown" id="priceBreakdown">฿50 × 1 hour</div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeExtendModal()">Cancel</button>
+          <button class="modal-btn confirm" onclick="confirmExtend()">Confirm Extension</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // ⭐ API Endpoint
     const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
     
     // ⭐ Global state
-    let allBookings = []; // เก็บข้อมูลจองทั้งหมดจาก DB
+    let allBookings = []; 
     let currentFilter = 'all';
-    
-    // ⭐ Mapping (เพื่อให้แสดงชื่อลานจอดสวยๆ)
+    let extendBookingId = null; // ❗ (เพิ่ม) สำหรับ Modal
+    const pricePerHour = 20; // ❗ (เพิ่ม) ราคา 20 บาท (จาก booking.html)
+
+    // ⭐ Mapping
     const lotNames = {
         "siit_a1": "SIIT Parking A1",
         "siit_a2": "SIIT Parking A2",
         "siit_bkd": "SIIT BKD",
-        // เพิ่มลานจอดอื่นๆ ที่นี่
     };
 
     // ⭐ 1. Check Login Status
@@ -700,21 +752,18 @@
 
     // ⭐ 2. Fetch Bookings from AWS
     async function fetchBookings() {
+        // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
         const bookingsList = document.getElementById('bookingsList');
         bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Loading bookings...</div></div>`;
-
         try {
             const response = await fetch(`${API_ENDPOINT}/mybookings?user_id=${username}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             allBookings = await response.json();
-            
-            // เรียงข้อมูล (ใหม่สุดมาก่อน)
             allBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
-            
-            renderBookings(); // แสดงผลครั้งแรก
-            updateStats(); // อัปเดตสถิติ
+            renderBookings(); 
+            updateStats(); 
         } catch (error) {
             console.error("Failed to fetch bookings:", error);
             bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Could not load bookings</div><div class="empty-subtitle">${error.message}</div></div>`;
@@ -741,14 +790,11 @@
         return;
       }
 
-      // ⭐ ใช้ Field (slot_id, start_time, price) จาก DynamoDB
       bookingsList.innerHTML = filteredBookings.map(booking => `
         <div class="booking-card ${booking.status}">
           <div class="booking-header">
-            <div class="booking-location">
-              <div class="location-name">${lotNames[booking.lot_id] || booking.lot_id}</div>
-              <div class="location-address">${booking.slot_id}</div>
-            </div>
+            <div class="location-name">${lotNames[booking.lot_id] || booking.lot_id}</div>
+            <div class="location-address">${booking.slot_id}</div>
             <div class="booking-status ${booking.status}">${booking.status}</div>
           </div>
 
@@ -777,7 +823,7 @@
             </div>
             <div class="detail-item">
               <div class="detail-label">Duration</div>
-              <div class="detail-value">${booking.duration_hours} hrs</div>
+              <div class="detail-value">${booking.duration_hours || 'N/A'} hrs</div>
             </div>
             <div class="detail-item">
               <div class="detail-label">Price</div>
@@ -787,6 +833,7 @@
 
           <div class="booking-actions">
             ${booking.status === 'active' ? `
+              <button class="action-btn primary" onclick="extendBooking('${booking.reservation_id}')">Extend Time</button>
               <button class="action-btn danger" onclick="cancelBooking('${booking.reservation_id}')">Cancel Booking</button>
             ` : booking.status === 'completed' ? `
               <button class="action-btn secondary" onclick="rebookParking('${booking.lot_id}')">Book Again</button>
@@ -800,10 +847,10 @@
 
     // ⭐ 4. Update Stats
     function updateStats() {
+      // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
       const total = allBookings.length;
       const active = allBookings.filter(b => b.status === 'active').length;
       const totalSpent = allBookings.reduce((sum, b) => sum + (b.price || 0), 0);
-
       document.getElementById('totalBookings').textContent = total;
       document.getElementById('activeBookings').textContent = active;
       document.getElementById('totalSpent').textContent = `฿${totalSpent}`;
@@ -819,7 +866,7 @@
       });
     });
     
-    // ⭐ 6. Helper Functions
+    // ⭐ 6. Helper Functions (ที่มีอยู่เดิม)
     function formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -831,23 +878,20 @@
     }
 
     async function cancelBooking(reservationId) {
+      // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
       if (!confirm(`Are you sure you want to cancel this booking?`)) {
         return;
       }
-      
       try {
-        // ❗ คุณต้องสร้าง Lambda 'cancelBooking' และ API 'POST /cancelbooking'
         const response = await fetch(`${API_ENDPOINT}/cancelbooking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reservation_id: reservationId })
         });
-        
         const result = await response.json();
-        
         if (response.ok) {
             alert('Booking cancelled successfully!');
-            fetchBookings(); // โหลดข้อมูลใหม่
+            fetchBookings(); 
         } else {
             throw new Error(result.message || 'Failed to cancel');
         }
@@ -858,7 +902,6 @@
     }
 
     function rebookParking(lotId) {
-      // หาชื่อที่สวยงามจาก lotId
       const placeName = lotNames[lotId] || 'Parking Lot';
       window.location.href = `booking.html?place=${encodeURIComponent(placeName)}&lot_id=${lotId}`;
     }
@@ -870,6 +913,93 @@
     function goToHome() {
       window.location.href = 'index.html';
     }
+
+    // --- 7. ✅ [เพิ่มใหม่] ฟังก์ชันสำหรับ Modal ต่อเวลา ---
+
+    function extendBooking(reservationId) {
+      extendBookingId = reservationId;
+      const booking = allBookings.find(b => b.reservation_id === reservationId);
+      
+      document.getElementById('extendLocation').textContent = lotNames[booking.lot_id] || booking.lot_id;
+      document.getElementById('extendSpace').textContent = booking.slot_id;
+      document.getElementById('extendCurrentEnd').textContent = formatTime(booking.end_time); // ❗ ใช้ข้อมูลจริง
+      
+      const slider = document.getElementById('timeSlider');
+      slider.value = 1;
+      updateSliderDisplay(1);
+      
+      document.getElementById('extendModal').classList.add('active');
+    }
+
+    function closeExtendModal() {
+      document.getElementById('extendModal').classList.remove('active');
+      extendBookingId = null;
+    }
+
+    function updateSliderDisplay(hours) {
+      const sliderValue = document.getElementById('sliderValue');
+      const additionalPrice = document.getElementById('additionalPrice');
+      const priceBreakdown = document.getElementById('priceBreakdown');
+      const slider = document.getElementById('timeSlider');
+      
+      sliderValue.textContent = hours === 1 ? '1 hr' : `${hours} hrs`;
+      const totalCost = pricePerHour * hours; // ❗ ใช้ราคา 20
+      additionalPrice.textContent = `฿${totalCost}`;
+      priceBreakdown.textContent = `฿${pricePerHour} × ${hours} hour${hours > 1 ? 's' : ''}`;
+      
+      const percentage = ((hours - 1) / 11) * 100;
+      slider.style.setProperty('--slider-progress', `${percentage}%`);
+    }
+
+    async function confirmExtend() {
+      const hours = parseInt(document.getElementById('timeSlider').value);
+      
+      try {
+        // ❗ (ยิง API /extendbooking ที่เราคุยกันครั้งก่อน)
+        const response = await fetch(`${API_ENDPOINT}/extendbooking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                reservation_id: extendBookingId,
+                additional_hours: hours 
+            })
+        });
+        
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Failed to extend time');
+        }
+        
+        alert(`Parking extended successfully!`);
+        fetchBookings(); // โหลดข้อมูลใหม่
+        
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      } finally {
+        closeExtendModal();
+      }
+    }
+
+    // --- 8. ✅ [เพิ่มใหม่] Event Listener สำหรับ Slider ---
+    // (ต้องใช้ DOMContentLoaded เพื่อให้แน่ใจว่า Slider ถูกโหลดแล้ว)
+    document.addEventListener('DOMContentLoaded', () => {
+      const slider = document.getElementById('timeSlider');
+      if (slider) { 
+        slider.addEventListener('input', (e) => {
+          updateSliderDisplay(parseInt(e.target.value));
+        });
+      }
+
+      // (เพิ่ม Listener ให้ Filter Tabs ที่คุณมีอยู่)
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            currentFilter = e.target.dataset.filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            renderBookings();
+        });
+      });
+    });
 
     // ⭐ 7. Load bookings on page load
     fetchBookings();
