@@ -1,45 +1,44 @@
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 .hidden {
   display: none !important;
 }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      color: #333;
-    }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+}
 
-    /* Header */
-    .top-bar {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+/* Header */
+.top-bar {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-    .top-bar h1 {
-      font-size: 24px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #071d81 0%, #0e47af 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+.top-bar h1 {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #071d81 0%, #0e47af 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-    /* Removes underline and blue color from the new header link */
+/* Removes underline and blue color from the new header link */
 .top-bar h1 a {
   color: inherit;
   text-decoration: none;
@@ -196,41 +195,41 @@
   margin: 4px 0;
 }
 
-    /* Search Bar */
-    .search-bar {
-      padding: 16px 24px;
-    }
+/* Search Bar */
+.search-bar {
+  padding: 16px 24px;
+}
 
-    .search-bar input {
-      width: 100%;
-      padding: 14px 16px 14px 48px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 12px;
-      font-size: 15px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+.search-bar input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-    .search-bar input:focus {
-      outline: none;
-      border-color: white;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    }
+.search-bar input:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
 
-    .search-bar input::placeholder {
-      color: #9ca3af;
-    }
+.search-bar input::placeholder {
+  color: #9ca3af;
+}
 
-    /* Map */
-    #map {
-      height: calc(100vh - 140px);
-      border-radius: 0;
-    }
+/* Map */
+#map {
+  height: calc(100vh - 140px);
+  border-radius: 0;
+}
 
 @media (max-width: 480px) {
-  .top-bar {
+  /* .top-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -239,20 +238,20 @@
   .top-bar-actions {
     width: 100%;
     justify-content: space-between;
-  }
+  } */
 
   .auth-buttons {
     gap: 8px;
   }
 
- .profile-dropdown {
+  .profile-dropdown {
     width: min(260px, calc(100vw - 48px));
   }
 
-      .top-bar h1 {
-        font-size: 20px;
-      }
-    }
+  .top-bar h1 {
+    font-size: 20px;
+  }
+}
 
 /* Personal Information Page */
 .profile-page {
@@ -476,48 +475,56 @@
   }
 }
 
-    /* Guest State Message */
-    .guest-message {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 16px 24px;
-      margin: 16px 24px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
+/* Guest State Message */
+.guest-message {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 16px 24px;
+  margin: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-    .guest-message p {
-      color: #6b7280;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
+.guest-message p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
 
-    .guest-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
+.guest-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
 
-    .guest-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+.guest-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-    .guest-btn.primary {
-      background: linear-gradient(135deg, #071d81 0%, #0e47af 100%);
-      color: white;
-    }
+.guest-btn.primary {
+  background: linear-gradient(135deg, #071d81 0%, #0e47af 100%);
+  color: white;
+}
 
-    .guest-btn.secondary {
-      background: #f3f4f6;
-      color: #374151;
-    }
+.guest-btn.secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
 
-    .guest-btn:hover {
-      transform: translateY(-2px);
-    }
+.guest-btn:hover {
+  transform: translateY(-2px);
+}
+
+#bookingsTable {
+  overflow-x: auto;
+  /* 1. นี่คือตัวที่เพิ่ม Scrollbar แนวนอน */
+  -webkit-overflow-scrolling: touch;
+  /* 2. ทำให้เลื่อนลื่นบน iPhone */
+}
+

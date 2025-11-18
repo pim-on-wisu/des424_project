@@ -254,11 +254,19 @@
       color: white;
     }
 
+    #bookingsTable {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
     /* Table */
     .data-table {
       width: 100%;
       border-collapse: collapse;
       table-layout: auto;
+      min-width: 768px;
+
+      /* 3. บังคับให้ตารางกว้างอย่างน้อย 768px */
     }
 
     .data-table th {
@@ -277,6 +285,7 @@
       border-bottom: 1px solid #f3f4f6;
       font-size: 14px;
       color: #374151;
+      white-space: nowrap;
     }
 
     .data-table tr:hover {
@@ -506,24 +515,70 @@
       color: #6b7280;
     }
 
-
-
     @media (max-width: 768px) {
       .container {
         padding: 16px;
       }
+      .card-header {
+    flex-direction: column;  /* 1. บังคับให้ Title และ Search-Filter เรียงแนวตั้ง */
+    align-items: flex-start; /* 2. จัดทุกอย่างชิดซ้าย */
+    gap: 20px;               /* 3. เพิ่มช่องว่าง 20px ระหว่าง Title และ Search-Filter */
+  }
 
       .stats-grid {
         grid-template-columns: 1fr;
       }
 
+      /* 1. บังคับเป็น 2 คอลัมน์ และลดช่องว่าง (gap) */
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      /* 2. ลดช่องว่าง (padding) ภายในการ์ด */
+      .stat-card {
+        padding: 16px;
+      }
+
+      /* 3. ลดขนาดไอคอน */
+      .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+        margin-bottom: 8px;
+        /* (ลดระยะห่าง) */
+      }
+
+      /* 4. ลดขนาดตัวเลข */
+      .stat-value {
+        font-size: 24px;
+        /* (จาก 36px) */
+        margin-bottom: 4px;
+      }
+
+      /* 5. (Optional) ลดขนาด Label ใต้ตัวเลข */
+      .stat-label {
+        font-size: 11px;
+      }
+      .card-title {
+    font-size: 18px; /* From 20px */
+  }
+
+
       .search-filter {
-        flex-direction: column;
+        /* flex-direction: column; */
+        flex-wrap: wrap;
       }
 
       .search-input {
         width: 100%;
+        margin-bottom: 8px;
       }
+      .filter-btn {
+    flex-grow: 1;  /* บังคับให้ปุ่ม 3 ปุ่มแชร์พื้นที่ 1 บรรทัด */
+    padding: 8px;    /* ลดขนาดปุ่ม */
+    font-size: 13px; /* ลดขนาดตัวอักษร */
+  }
 
       .data-table {
         font-size: 12px;
@@ -545,10 +600,10 @@
   <header class="admin-header">
     <div class="header-left">
       <div>
-        <div class="admin-badge">Admin Panel</div>
+        <div class="admin-badge">Admin Dashboard</div>
         <div class="header-title">
-          <h1>Dashboard</h1>
-          <div class="header-subtitle">Manage all bookings and users</div>
+          <!-- <h1>Dashboard</h1> -->
+          <!-- <div class="header-subtitle">Manage all bookings and users</div> -->
         </div>
       </div>
     </div>

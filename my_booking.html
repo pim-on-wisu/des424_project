@@ -12,9 +12,9 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    } */
+    }
 
-    body {
+    */ body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
@@ -70,41 +70,48 @@
     /* Stats Section */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(3, 1fr);
+      /* ✅ บังคับ 3 คอลัมน์เสมอ */
+      gap: 12px;
+      /* ลดช่องว่างระหว่างการ์ด */
+      margin-bottom: 24px;
     }
 
     .stat-card {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-radius: 16px;
-      padding: 24px;
+      padding: 16px;
+      /* ✅ ลด Padding (จาก 24px) ให้การ์ดเล็กลง */
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
     .stat-icon {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      /* ✅ ลดขนาดไอคอน (จาก 48px) */
+      height: 40px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 12px;
-      margin: 0 auto 12px;
+      margin: 0 auto 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 20px;
+      /* ✅ ลดขนาด Emoji */
     }
 
     .stat-value {
-      font-size: 32px;
+      font-size: 24px;
+      /* ✅ ลดขนาดตัวเลข (จาก 32px) */
       font-weight: 700;
       color: #1f2937;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .stat-label {
-      font-size: 14px;
+      font-size: 12px;
+      /* ✅ ลดขนาดตัวหนังสือ (จาก 14px) */
       color: #6b7280;
     }
 
@@ -616,11 +623,33 @@
       }
 
       .stats-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
+        /* ✅ บังคับ 3 คอลัมน์ในมือถือด้วย */
+        gap: 8px;
+        /* ลดช่องว่างในมือถือให้ชิดกันหน่อย */
       }
 
+      /* ✅ แก้ไขส่วนนี้ */
       .filter-tabs {
-        flex-direction: column;
+        flex-direction: row;
+        /* 1. บังคับเรียงแนวนอน */
+        overflow-x: auto;
+        /* 2. ให้เลื่อนซ้าย-ขวาได้ ถ้าจอเล็ก */
+        white-space: nowrap;
+        /* 3. ห้ามปุ่มตกบรรทัด */
+        -webkit-overflow-scrolling: touch;
+        /* 4. เลื่อนลื่นๆ บน iPhone */
+        padding-bottom: 8px;
+        /* (Optional) กัน Scrollbar บัง */
+      }
+
+      .filter-tab {
+        flex: 1;
+        /* 5. ให้ปุ่มยืดขยายเต็มพื้นที่ (หรือใช้ flex: 0 0 auto; ถ้าอยากให้ขนาดพอดีคำ) */
+        font-size: 13px;
+        /* 6. ลดขนาดตัวอักษรนิดหน่อย */
+        padding: 10px;
+        /* 7. ปรับขนาดปุ่ม */
       }
 
       .booking-details {
@@ -727,60 +756,66 @@
       </div>
     </div>
 
-<script>
-    // ⭐ API Endpoint
-    const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
-    
-    // ⭐ Global state
-    let allBookings = []; 
-    let currentFilter = 'all';
-    let extendBookingId = null; // ❗ (เพิ่ม) สำหรับ Modal
-    const pricePerHour = 20; // ❗ (เพิ่ม) ราคา 20 บาท (จาก booking.html)
+    <script>
+      // ⭐ API Endpoint
+      const API_ENDPOINT = "https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev";
 
-    // ⭐ Mapping
-    const lotNames = {
+      // ⭐ Global state
+      let allBookings = [];
+      let currentFilter = 'all';
+      let extendBookingId = null; // ❗ (เพิ่ม) สำหรับ Modal
+      const pricePerHour = 20; // ❗ (เพิ่ม) ราคา 20 บาท (จาก booking.html)
+
+      // ⭐ Mapping
+      const lotNames = {
         "siit_a1": "SIIT Parking A1",
         "siit_a2": "SIIT Parking A2",
         "siit_bkd": "SIIT BKD",
-    };
+      };
 
-    // ⭐ 1. Check Login Status
-    const username = sessionStorage.getItem("username"); 
-    if (!username) {
+      // ⭐ 1. Check Login Status
+      const username = sessionStorage.getItem("username");
+      if (!username) {
         sessionStorage.setItem("previousPage", window.location.href);
         window.location.href = "login.html";
-    }
+      }
 
-    // ⭐ 2. Fetch Bookings from AWS
-    async function fetchBookings() {
+      // ⭐ 2. Fetch Bookings from AWS
+      async function fetchBookings() {
         // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
         const bookingsList = document.getElementById('bookingsList');
         bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Loading bookings...</div></div>`;
         try {
-            const response = await fetch(`${API_ENDPOINT}/mybookings?user_id=${username}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            allBookings = await response.json();
-            allBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
-            renderBookings(); 
-            updateStats(); 
+          const response = await fetch(`${API_ENDPOINT}/mybookings?user_id=${username}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          allBookings = await response.json();
+          allBookings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+          renderBookings();
+          updateStats();
         } catch (error) {
-            console.error("Failed to fetch bookings:", error);
-            bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Could not load bookings</div><div class="empty-subtitle">${error.message}</div></div>`;
+          console.error("Failed to fetch bookings:", error);
+          bookingsList.innerHTML = `<div class="empty-state"><div class="empty-title">Could not load bookings</div><div class="empty-subtitle">${error.message}</div></div>`;
         }
-    }
+      }
 
-    // ⭐ 3. Render Bookings (แสดงผลตาม filter)
-    function renderBookings() {
-      const bookingsList = document.getElementById('bookingsList');
-      
-      const filteredBookings = currentFilter === 'all'
-        ? allBookings
-        : allBookings.filter(b => b.status === currentFilter);
+      // ⭐ 3. Render Bookings (แสดงผลตาม filter)
+      function renderBookings() {
+        const bookingsList = document.getElementById('bookingsList');
 
-      if (filteredBookings.length === 0) {
-        bookingsList.innerHTML = `
+        const filteredBookings = currentFilter === 'all'
+          ? allBookings
+          : allBookings.filter(b => {
+            // ถ้าเลือกแท็บ 'cancelled' ให้รวมทั้ง 'cancelled by user' และ 'by admin'
+            if (currentFilter === 'cancelled') {
+              return b.status.includes('cancelled');
+            }
+            // แท็บอื่น (active, completed) เช็กตรงตัวเหมือนเดิม
+            return b.status === currentFilter;
+          });
+        if (filteredBookings.length === 0) {
+          bookingsList.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">📋</div>
             <div class="empty-title">No bookings found</div>
@@ -788,10 +823,10 @@
             <button class="empty-btn" onclick="goToHome()">Find Parking</button>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      bookingsList.innerHTML = filteredBookings.map(booking => `
+        bookingsList.innerHTML = filteredBookings.map(booking => `
         <div class="booking-card ${booking.status}">
           <div class="booking-header">
             <div class="location-name">${lotNames[booking.lot_id] || booking.lot_id}</div>
@@ -844,170 +879,173 @@
           </div>
         </div>
       `).join('');
-    }
+      }
 
-    // ⭐ 4. Update Stats
-    function updateStats() {
-      // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
-      const total = allBookings.length;
-      const active = allBookings.filter(b => b.status === 'active').length;
-      const totalSpent = allBookings.reduce((sum, b) => sum + (b.price || 0), 0);
-      document.getElementById('totalBookings').textContent = total;
-      document.getElementById('activeBookings').textContent = active;
-      document.getElementById('totalSpent').textContent = `฿${totalSpent}`;
-    }
+      // ⭐ 4. Update Stats
+      function updateStats() {
+        // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
+        const total = allBookings.length;
+        const active = allBookings.filter(b => b.status === 'active').length;
+        const totalSpent = allBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+        document.getElementById('totalBookings').textContent = total;
+        document.getElementById('activeBookings').textContent = active;
+        document.getElementById('totalSpent').textContent = `฿${totalSpent}`;
+      }
 
-    // ⭐ 5. Filter Logic
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
+      // ⭐ 5. Filter Logic
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
           currentFilter = e.target.dataset.filter;
           document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
           e.target.classList.add('active');
           renderBookings();
+        });
       });
-    });
-    
-    // ⭐ 6. Helper Functions (ที่มีอยู่เดิม)
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-    
-    function formatTime(dateString) {
+
+      // ⭐ 6. Helper Functions (ที่มีอยู่เดิม)
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function formatTime(dateString) {
         const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-    }
-
-    async function cancelBooking(reservationId) {
-      // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
-      if (!confirm(`Are you sure you want to cancel this booking?`)) {
-        return;
       }
-      try {
-        const response = await fetch(`${API_ENDPOINT}/cancelbooking`, {
+
+      async function cancelBooking(reservationId) {
+        // ... (โค้ดส่วนนี้ของคุณถูกต้องอยู่แล้ว ไม่ต้องแก้) ...
+        if (!confirm(`Are you sure you want to cancel this booking?`)) {
+          return;
+        }
+        try {
+          const response = await fetch(`${API_ENDPOINT}/cancelbooking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reservation_id: reservationId })
-        });
-        const result = await response.json();
-        if (response.ok) {
+          });
+          const result = await response.json();
+          if (response.ok) {
             alert('Booking cancelled successfully!');
-            fetchBookings(); 
-        } else {
+            fetchBookings();
+          } else {
             throw new Error(result.message || 'Failed to cancel');
-        }
-      } catch (error) {
+          }
+        } catch (error) {
           console.error("Cancel error:", error);
           alert(`Could not cancel booking: ${error.message}`);
+        }
       }
-    }
 
-    function rebookParking(lotId) {
-      const placeName = lotNames[lotId] || 'Parking Lot';
-      window.location.href = `booking.html?place=${encodeURIComponent(placeName)}&lot_id=${lotId}`;
-    }
+      function rebookParking(lotId) {
+        const placeName = lotNames[lotId] || 'Parking Lot';
+        window.location.href = `booking.html?place=${encodeURIComponent(placeName)}&lot_id=${lotId}`;
+      }
 
-    function goBack() {
-      window.location.href = 'index.html';
-    }
+      function goBack() {
+        window.location.href = 'index.html';
+      }
 
-    function goToHome() {
-      window.location.href = 'index.html';
-    }
+      function goToHome() {
+        window.location.href = 'index.html';
+      }
 
-    // --- 7. ✅ [เพิ่มใหม่] ฟังก์ชันสำหรับ Modal ต่อเวลา ---
+      // --- 7. ✅ [เพิ่มใหม่] ฟังก์ชันสำหรับ Modal ต่อเวลา ---
 
-    function extendBooking(reservationId) {
-      extendBookingId = reservationId;
-      const booking = allBookings.find(b => b.reservation_id === reservationId);
-      
-      document.getElementById('extendLocation').textContent = lotNames[booking.lot_id] || booking.lot_id;
-      document.getElementById('extendSpace').textContent = booking.slot_id;
-      document.getElementById('extendCurrentEnd').textContent = formatTime(booking.end_time); // ❗ ใช้ข้อมูลจริง
-      
-      const slider = document.getElementById('timeSlider');
-      slider.value = 1;
-      updateSliderDisplay(1);
-      
-      document.getElementById('extendModal').classList.add('active');
-    }
+      function extendBooking(reservationId) {
+        extendBookingId = reservationId;
+        const booking = allBookings.find(b => b.reservation_id === reservationId);
 
-    function closeExtendModal() {
-      document.getElementById('extendModal').classList.remove('active');
-      extendBookingId = null;
-    }
+        document.getElementById('extendLocation').textContent = lotNames[booking.lot_id] || booking.lot_id;
+        document.getElementById('extendSpace').textContent = booking.slot_id;
+        document.getElementById('extendCurrentEnd').textContent = formatTime(booking.end_time); // ❗ ใช้ข้อมูลจริง
 
-    function updateSliderDisplay(hours) {
-      const sliderValue = document.getElementById('sliderValue');
-      const additionalPrice = document.getElementById('additionalPrice');
-      const priceBreakdown = document.getElementById('priceBreakdown');
-      const slider = document.getElementById('timeSlider');
-      
-      sliderValue.textContent = hours === 1 ? '1 hr' : `${hours} hrs`;
-      const totalCost = pricePerHour * hours; // ❗ ใช้ราคา 20
-      additionalPrice.textContent = `฿${totalCost}`;
-      priceBreakdown.textContent = `฿${pricePerHour} × ${hours} hour${hours > 1 ? 's' : ''}`;
-      
-      const percentage = ((hours - 1) / 11) * 100;
-      slider.style.setProperty('--slider-progress', `${percentage}%`);
-    }
+        const slider = document.getElementById('timeSlider');
+        slider.value = 1;
+        updateSliderDisplay(1);
 
-    async function confirmExtend() {
-      const hours = parseInt(document.getElementById('timeSlider').value);
-      
-      try {
-        // ❗ (ยิง API /extendbooking ที่เราคุยกันครั้งก่อน)
-        const response = await fetch(`${API_ENDPOINT}/extendbooking`, {
+        document.getElementById('extendModal').classList.add('active');
+      }
+
+      function closeExtendModal() {
+        document.getElementById('extendModal').classList.remove('active');
+        extendBookingId = null;
+      }
+
+      function updateSliderDisplay(hours) {
+        const sliderValue = document.getElementById('sliderValue');
+        const additionalPrice = document.getElementById('additionalPrice');
+        const priceBreakdown = document.getElementById('priceBreakdown');
+        const slider = document.getElementById('timeSlider');
+
+        sliderValue.textContent = hours === 1 ? '1 hr' : `${hours} hrs`;
+        const totalCost = pricePerHour * hours; // ❗ ใช้ราคา 20
+        additionalPrice.textContent = `฿${totalCost}`;
+        priceBreakdown.textContent = `฿${pricePerHour} × ${hours} hour${hours > 1 ? 's' : ''}`;
+
+        const percentage = ((hours - 1) / 11) * 100;
+        slider.style.setProperty('--slider-progress', `${percentage}%`);
+      }
+
+      async function confirmExtend() {
+        const hours = parseInt(document.getElementById('timeSlider').value);
+
+        try {
+          // ❗ (ยิง API /extendbooking ที่เราคุยกันครั้งก่อน)
+          const response = await fetch(`${API_ENDPOINT}/extendbooking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                reservation_id: extendBookingId,
-                additional_hours: hours 
+            body: JSON.stringify({
+              reservation_id: extendBookingId,
+              additional_hours: hours
             })
-        });
-        
-        const result = await response.json();
-        if (!response.ok) {
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
             throw new Error(result.message || 'Failed to extend time');
+          }
+
+          alert(`Parking extended successfully!`);
+          fetchBookings(); // โหลดข้อมูลใหม่
+
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+        } finally {
+          closeExtendModal();
         }
-        
-        alert(`Parking extended successfully!`);
-        fetchBookings(); // โหลดข้อมูลใหม่
-        
-      } catch (error) {
-        alert(`Error: ${error.message}`);
-      } finally {
-        closeExtendModal();
-      }
-    }
-
-    // --- 8. ✅ [เพิ่มใหม่] Event Listener สำหรับ Slider ---
-    // (ต้องใช้ DOMContentLoaded เพื่อให้แน่ใจว่า Slider ถูกโหลดแล้ว)
-    document.addEventListener('DOMContentLoaded', () => {
-      const slider = document.getElementById('timeSlider');
-      if (slider) { 
-        slider.addEventListener('input', (e) => {
-          updateSliderDisplay(parseInt(e.target.value));
-        });
       }
 
-      // (เพิ่ม Listener ให้ Filter Tabs ที่คุณมีอยู่)
-      document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
+      // --- 8. ✅ [เพิ่มใหม่] Event Listener สำหรับ Slider ---
+      // (ต้องใช้ DOMContentLoaded เพื่อให้แน่ใจว่า Slider ถูกโหลดแล้ว)
+      document.addEventListener('DOMContentLoaded', () => {
+        const slider = document.getElementById('timeSlider');
+        if (slider) {
+          slider.addEventListener('input', (e) => {
+            updateSliderDisplay(parseInt(e.target.value));
+          });
+        }
+
+        // (เพิ่ม Listener ให้ Filter Tabs ที่คุณมีอยู่)
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
             currentFilter = e.target.dataset.filter;
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
             e.target.classList.add('active');
             renderBookings();
+          });
         });
       });
-    });
 
-    // ⭐ 7. Load bookings on page load
-    fetchBookings();
-  </script>
+      // ⭐ 7. Load bookings on page load
+      fetchBookings();
+    </script>
 </body>
+
 </html>
 </body>
+
 </html>
 </body>
+
 </html>
