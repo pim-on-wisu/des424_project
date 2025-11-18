@@ -629,11 +629,13 @@
     }
 
     // ✅ 6. ฟังก์ชันจองที่จอด (ส่งไป Lambda)
-    confirmBtn.addEventListener("click", async () => {
-      if (!checkLoginStatus()) {
-        window.location.href = "login.html";
-        return;
-      }
+confirmBtn.addEventListener("click", async () => {
+  if (!checkLoginStatus()) {
+    // ✅ Add this line before redirecting
+    sessionStorage.setItem("previousPage", window.location.href); 
+    window.location.href = "login.html";
+    return;
+  }
 
       const total = pricePerHour * selectedHours;
       const userId = sessionStorage.getItem("username") || "guest";
