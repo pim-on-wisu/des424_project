@@ -295,7 +295,8 @@
     }
 
     .price-display {
-       background: linear-gradient(135deg, #81e294 0%, #10b981 100%); /* #764ba2 */
+      background: linear-gradient(135deg, #81e294 0%, #10b981 100%);
+      /* #764ba2 */
       color: white;
       padding: 16px;
       border-radius: 10px;
@@ -629,26 +630,37 @@
     }
 
     // ✅ 6. ฟังก์ชันจองที่จอด (ส่งไป Lambda)
-confirmBtn.addEventListener("click", async () => {
-  if (!checkLoginStatus()) {
-    // ✅ Add this line before redirecting
-    sessionStorage.setItem("previousPage", window.location.href); 
-    window.location.href = "login.html";
-    return;
-  }
+    confirmBtn.addEventListener("click", async () => {
+      if (!checkLoginStatus()) {
+        // ✅ Add this line before redirecting
+        sessionStorage.setItem("previousPage", window.location.href);
+        window.location.href = "login.html";
+        return;
+      }
 
       const total = pricePerHour * selectedHours;
       const userId = sessionStorage.getItem("username") || "guest";
-      const startTime = new Date().toISOString();
-      const endTime = new Date(Date.now() + selectedHours * 60 * 60 * 1000).toISOString();
+
+      // --- 1. ดึงค่าจาก Input และตรวจสอบ ---
+      const selectedTimeInput = document.getElementById('startTime').value;
+      if (!selectedTimeInput) {
+        alert("กรุณาเลือกเวลาเริ่มต้นจอง");
+        return;
+      }
+
+      // 2. คำนวณเวลา (โดยใช้เวลาที่เลือกในฟอร์มเป็นจุดเริ่มต้น)
+      const startTimeMs = new Date(selectedTimeInput).getTime();
+
+      // 3. สร้าง ISO strings ที่ถูกต้อง
+      const startTime = new Date(startTimeMs).toISOString();
+      const endTime = new Date(startTimeMs + selectedHours * 60 * 60 * 1000).toISOString();
 
       const bookingData = {
         slot_id: selectedSlot,
         user_id: userId,
-        start_time: startTime,
-        end_time: endTime,
+        start_time: startTime, // ⬅️ FIX: ใช้เวลาที่เลือก
+        end_time: endTime,     // ⬅️ FIX: คำนวณจากเวลาที่เลือก
       };
-
       try {
         const response = await fetch("https://0jcihmcez1.execute-api.ap-southeast-1.amazonaws.com/dev/bookParking", {
           method: "POST",
